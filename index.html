@@ -1,0 +1,1160 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>嵌入式项目作品集</title>
+<style>
+/* ===== 主题变量 ===== */
+:root {
+  --bg: #0a0e1a;
+  --bg-card: #131a2b;
+  --bg-card-hover: #1a2340;
+  --border: #1e293b;
+  --border-active: #06b6d4;
+  --text: #f1f5f9;
+  --text-dim: #64748b;
+  --text-mid: #94a3b8;
+  --accent: #06b6d4;
+  --accent-2: #3b82f6;
+  --warn: #f59e0b;
+  --success: #10b981;
+  --radius: 14px;
+  --shadow: 0 4px 24px rgba(0,0,0,0.4);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* 电路板纹理背景 */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 20% 50%, rgba(6,182,212,0.06) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(59,130,246,0.05) 0%, transparent 50%),
+    linear-gradient(rgba(30,41,59,0.3) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(30,41,59,0.3) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.container {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 0 16px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ===== 顶部个人简介 ===== */
+.header {
+  padding: 40px 0 28px;
+  text-align: center;
+}
+
+.header .avatar {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 16px;
+  font-size: 28px; font-weight: 700; color: #fff;
+  box-shadow: 0 0 24px rgba(6,182,212,0.3);
+}
+
+.header h1 {
+  font-size: 22px; font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.header .title {
+  display: inline-block;
+  font-size: 13px;
+  color: var(--accent);
+  background: rgba(6,182,212,0.1);
+  border: 1px solid rgba(6,182,212,0.3);
+  padding: 3px 12px;
+  border-radius: 20px;
+  margin-bottom: 10px;
+}
+
+.header .bio {
+  font-size: 14px;
+  color: var(--text-mid);
+  max-width: 380px;
+  margin: 0 auto;
+}
+
+/* ===== 项目统计 ===== */
+.stats {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  padding: 16px 0;
+  margin-bottom: 8px;
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-item .num {
+  font-size: 24px; font-weight: 700;
+  color: var(--accent);
+  font-family: "SF Mono", "Fira Code", monospace;
+}
+
+.stat-item .label {
+  font-size: 11px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* ===== 区块标题 ===== */
+.section-title {
+  font-size: 13px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin: 24px 0 14px;
+  display: flex; align-items: center; gap: 8px;
+}
+
+.section-title::before {
+  content: '';
+  width: 3px; height: 14px;
+  background: var(--accent);
+  border-radius: 2px;
+}
+
+/* ===== 项目概述 ===== */
+.overview {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  margin-bottom: 20px;
+}
+
+.overview-text {
+  font-size: 13px;
+  color: var(--text-mid);
+  line-height: 1.8;
+}
+
+.overview-text strong {
+  color: var(--text);
+}
+
+.highlight-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 16px 0 6px;
+}
+
+.highlight-item {
+  flex: 1;
+  text-align: center;
+  background: rgba(6,182,212,0.06);
+  border: 1px solid rgba(6,182,212,0.15);
+  border-radius: 10px;
+  padding: 12px 6px;
+}
+
+.highlight-num {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--accent);
+  font-family: "SF Mono", "Fira Code", monospace;
+  margin-bottom: 4px;
+}
+
+.highlight-label {
+  font-size: 10px;
+  color: var(--text-dim);
+  line-height: 1.4;
+}
+
+.highlight-sub {
+  color: var(--text-dim);
+  opacity: 0.7;
+}
+
+/* ===== 实测数据 ===== */
+.test-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.test-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.test-img-wrap {
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: #000;
+  overflow: hidden;
+  position: relative;
+}
+
+.test-img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.test-img-fallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-dim);
+  font-size: 13px;
+  text-align: center;
+  background: rgba(6,182,212,0.04);
+  border: 1px dashed var(--border);
+}
+
+.test-img-fallback small {
+  color: var(--accent);
+}
+
+.img-carousel {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.img-carousel .carousel-slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.img-carousel .carousel-slide.active {
+  opacity: 1;
+}
+
+.img-carousel .carousel-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.carousel-dots {
+  position: absolute;
+  bottom: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+  z-index: 2;
+}
+
+.carousel-dots .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.4);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.carousel-dots .dot.active {
+  background: var(--accent);
+}
+
+.carousel-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.5);
+  color: #fff;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.img-carousel:hover .carousel-arrow {
+  opacity: 1;
+}
+
+.carousel-arrow.prev { left: 6px; }
+.carousel-arrow.next { right: 6px; }
+
+.carousel-caption {
+  position: absolute;
+  bottom: 22px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  z-index: 1;
+}
+
+.carousel-caption span {
+  display: inline-block;
+  background: rgba(0,0,0,0.65);
+  color: #e2e8f0;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 3px;
+}
+
+.test-info {
+  padding: 12px 14px;
+}
+
+.test-title {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 3px;
+}
+
+.test-desc {
+  font-size: 11px;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+
+/* ===== 开发工具列表 ===== */
+.tools-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.tool-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  transition: border-color 0.2s;
+}
+
+.tool-item:active { border-color: var(--accent); }
+
+.tool-icon {
+  width: 36px; height: 36px;
+  border-radius: 8px;
+  background: rgba(139,92,246,0.12);
+  color: #a78bfa;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.tool-info { flex: 1; min-width: 0; }
+
+.tool-name {
+  font-size: 13px; font-weight: 600;
+  margin-bottom: 1px;
+}
+
+.tool-desc {
+  font-size: 11px;
+  color: var(--text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ===== 项目卡片 ===== */
+.project-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 14px;
+  overflow: hidden;
+  transition: border-color 0.3s, transform 0.2s;
+  cursor: pointer;
+}
+
+.project-card:active { transform: scale(0.98); }
+
+.project-card.active {
+  border-color: var(--border-active);
+  box-shadow: 0 0 0 1px rgba(6,182,212,0.2), var(--shadow);
+}
+
+.card-header {
+  padding: 18px 18px 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.card-icon {
+  width: 44px; height: 44px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.card-icon.blue { background: rgba(59,130,246,0.15); color: #60a5fa; }
+.card-icon.cyan { background: rgba(6,182,212,0.15); color: #22d3ee; }
+.card-icon.amber { background: rgba(245,158,11,0.15); color: #fbbf24; }
+.card-icon.green { background: rgba(16,185,129,0.15); color: #34d399; }
+.card-icon.purple { background: rgba(139,92,246,0.15); color: #a78bfa; }
+
+.card-info { flex: 1; min-width: 0; }
+
+.card-name {
+  font-size: 15px; font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.card-tagline {
+  font-size: 12px;
+  color: var(--text-mid);
+  margin-bottom: 8px;
+}
+
+.card-tags {
+  display: flex; flex-wrap: wrap; gap: 5px;
+}
+
+.tag {
+  font-size: 10px;
+  font-family: "SF Mono", "Fira Code", monospace;
+  color: var(--text-dim);
+  background: rgba(30,41,59,0.6);
+  border: 1px solid var(--border);
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+.card-arrow {
+  color: var(--text-dim);
+  font-size: 14px;
+  transition: transform 0.3s;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+.project-card.active .card-arrow { transform: rotate(90deg); color: var(--accent); }
+
+/* ===== 卡片展开内容 ===== */
+.card-detail {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease;
+}
+
+.project-card.active .card-detail {
+  max-height: 1200px;
+}
+
+.detail-inner {
+  padding: 0 18px 18px;
+  border-top: 1px solid var(--border);
+  margin-top: 0;
+}
+
+.detail-section {
+  padding-top: 14px;
+}
+
+.detail-label {
+  font-size: 11px;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.detail-text {
+  font-size: 13px;
+  color: var(--text-mid);
+  line-height: 1.7;
+}
+
+.feature-list {
+  list-style: none;
+}
+
+.feature-list li {
+  font-size: 13px;
+  color: var(--text-mid);
+  padding: 5px 0;
+  padding-left: 18px;
+  position: relative;
+}
+
+.feature-list li::before {
+  content: '▸';
+  position: absolute;
+  left: 0;
+  color: var(--accent);
+}
+
+/* ===== 视频占位 ===== */
+.video-placeholder {
+  background: #000;
+  border-radius: 10px;
+  aspect-ratio: 16/9;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 12px 0;
+  border: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+}
+
+.video-placeholder::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(6,182,212,0.08) 0%, transparent 70%);
+}
+
+.play-btn {
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  background: rgba(6,182,212,0.2);
+  border: 2px solid var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1;
+}
+
+.play-btn::after {
+  content: '';
+  width: 0; height: 0;
+  border-left: 14px solid var(--accent);
+  border-top: 9px solid transparent;
+  border-bottom: 9px solid transparent;
+  margin-left: 4px;
+}
+
+.video-placeholder .label {
+  font-size: 12px;
+  color: var(--text-dim);
+  z-index: 1;
+}
+
+/* ===== Gitee 按钮 ===== */
+.gitee-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  margin-top: 14px;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.gitee-btn:active { transform: scale(0.97); opacity: 0.9; }
+
+/* ===== 技术栈总览 ===== */
+.tech-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.tech-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  text-align: center;
+}
+
+.tech-item .tech-name {
+  font-size: 13px; font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.tech-item .tech-ver {
+  font-size: 10px;
+  color: var(--text-dim);
+  font-family: "SF Mono", monospace;
+}
+
+/* ===== 底部联系 ===== */
+.footer {
+  text-align: center;
+  padding: 30px 0 40px;
+  border-top: 1px solid var(--border);
+  margin-top: 20px;
+}
+
+.footer .contact-row {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.contact-btn {
+  width: 42px; height: 42px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  text-decoration: none;
+  font-size: 18px;
+  transition: border-color 0.2s;
+}
+
+.contact-btn:active { border-color: var(--accent); }
+
+.footer .copy {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+/* ===== 动画 ===== */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.project-card { animation: fadeUp 0.4s ease backwards; }
+.project-card:nth-child(1) { animation-delay: 0.05s; }
+.project-card:nth-child(2) { animation-delay: 0.1s; }
+.project-card:nth-child(3) { animation-delay: 0.15s; }
+.project-card:nth-child(4) { animation-delay: 0.2s; }
+.project-card:nth-child(5) { animation-delay: 0.25s; }
+
+/* ===== 桌面端适配 ===== */
+@media (min-width: 768px) {
+  .container { max-width: 720px; padding: 0 24px; }
+  .header h1 { font-size: 28px; }
+  .header .bio { font-size: 15px; }
+  .card-name { font-size: 16px; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- ===== 个人简介 ===== -->
+  <div class="header">
+    <div class="avatar">嵌入式</div>
+    <h1>嵌入式项目作品集</h1>
+    <div class="title">STM32H743 · RT-Thread · LVGL</div>
+    <p class="bio">以 STM32H743 为核心的自研嵌入式综合平台，集成华为云 IoT OTA、LVGL 图形界面、WiFi 无线通信于一体</p>
+  </div>
+
+  <!-- ===== 统计 ===== -->
+  <div class="stats">
+    <div class="stat-item">
+      <div class="num">4</div>
+      <div class="label">核心模块</div>
+    </div>
+    <div class="stat-item">
+      <div class="num">480M</div>
+      <div class="label">主频 Hz</div>
+    </div>
+    <div class="stat-item">
+      <div class="num">45+</div>
+      <div class="label">LVGL FPS</div>
+    </div>
+  </div>
+
+  <!-- ===== 项目概述 ===== -->
+  <div class="overview">
+    <div class="overview-text">
+      本项目是一个<strong>多子系统深度集成的嵌入式综合平台</strong>，不是单一功能的 Demo。以 STM32H743（Cortex-M7 @480MHz）为核心，从 Bootloader 到应用层完整自研，涵盖<strong>华为云 IoT OTA 远程升级、LVGL 触摸屏 GUI、ESP-Hosted WiFi 通信、SDRAM/QSPI Flash 存储管理</strong>四大子系统，各模块协同工作而非独立堆叠。
+    </div>
+    <div class="highlight-row">
+      <div class="highlight-item">
+        <div class="highlight-num">7500+</div>
+        <div class="highlight-label">TCP 吞吐 kbps<br><span class="highlight-sub">iperf3 实测</span></div>
+      </div>
+      <div class="highlight-item">
+        <div class="highlight-num">~1MB/s</div>
+        <div class="highlight-label">WiFi 实际带宽<br><span class="highlight-sub">ESP-Hosted SPI</span></div>
+      </div>
+      <div class="highlight-item">
+        <div class="highlight-num">50FPS</div>
+        <div class="highlight-label">LVGL 刷新率<br><span class="highlight-sub">800×480 双缓冲</span></div>
+      </div>
+    </div>
+    <div class="overview-text" style="margin-top:10px;">
+      系统亮点：LTDC 行中断同步彻底消除屏幕撕裂；OTA 断点续传 + CRC32 校验确保固件安全；SDRAM 时序 Bug 修复后随机访问提升 5.3 倍；<strong>4 区域 MPU Cache 策略</strong>（DTCM 零等待 / AXI Write-Back / SRAM4 Non-Cacheable / SDRAM Write-Back），D-Cache 一致性管理确保 DMA2D、MDMA、LTDC 并发无数据错乱；<strong>链接脚本 5 区域内存布局</strong>（ROM/DTCM/AXI/SDRAM/SRAM4），多 RAM 混合调度（AXI memheap 绑定 LVGL、SRAM4 固定块内存池供 DMA、SDRAM 帧缓冲、DTCM 系统堆+栈）。全栈从 CubeMX 引脚配置到应用层 UI 均独立完成。
+    </div>
+  </div>
+
+  <!-- ===== 技术栈总览 ===== -->
+  <div class="section-title">技术栈</div>
+  <div class="tech-grid">
+    <div class="tech-item"><div class="tech-name">STM32H743</div><div class="tech-ver">Cortex-M7 @480MHz</div></div>
+    <div class="tech-item"><div class="tech-name">RT-Thread</div><div class="tech-ver">v5.1.0</div></div>
+    <div class="tech-item"><div class="tech-name">MPU + D-Cache</div><div class="tech-ver">4 区域 Cache 策略</div></div>
+    <div class="tech-item"><div class="tech-name">LVGL</div><div class="tech-ver">v8.3.10</div></div>
+    <div class="tech-item"><div class="tech-name">DMA2D</div><div class="tech-ver">硬件 2D 加速</div></div>
+    <div class="tech-item"><div class="tech-name">JPEG 硬解</div><div class="tech-ver">MDMA 零拷贝</div></div>
+    <div class="tech-item"><div class="tech-name">LTDC</div><div class="tech-ver">LCD 控制器</div></div>
+    <div class="tech-item"><div class="tech-name">华为云 IoT</div><div class="tech-ver">MQTT + OTA</div></div>
+    <div class="tech-item"><div class="tech-name">LwIP</div><div class="tech-ver">TCP/IP 协议栈</div></div>
+    <div class="tech-item"><div class="tech-name">ESP-Hosted</div><div class="tech-ver">SPI 37.5MHz</div></div>
+    <div class="tech-item"><div class="tech-name">mbedTLS</div><div class="tech-ver">v2.28.1 TLS</div></div>
+    <div class="tech-item"><div class="tech-name">Paho MQTT</div><div class="tech-ver">MQTT 客户端</div></div>
+    <div class="tech-item"><div class="tech-name">FAL</div><div class="tech-ver">Flash 抽象层</div></div>
+    <div class="tech-item"><div class="tech-name">SDRAM</div><div class="tech-ver">32MB W9825G6KH</div></div>
+    <div class="tech-item"><div class="tech-name">W25Q64</div><div class="tech-ver">QSPI Flash 8MB</div></div>
+    <div class="tech-item"><div class="tech-name">Webclient</div><div class="tech-ver">v2.2.0 HTTP</div></div>
+    <div class="tech-item"><div class="tech-name">GT911</div><div class="tech-ver">电容触摸 I2C</div></div>
+    <div class="tech-item"><div class="tech-name">cJSON</div><div class="tech-ver">v1.7.17</div></div>
+    <div class="tech-item"><div class="tech-name">EasyFlash</div><div class="tech-ver">参数持久化</div></div>
+  </div>
+
+  <!-- ===== 开发工具 ===== -->
+  <div class="section-title">开发工具</div>
+  <div class="tools-list">
+    <div class="tool-item">
+      <div class="tool-icon">◈</div>
+      <div class="tool-info">
+        <div class="tool-name">RT-Thread Studio</div>
+        <div class="tool-desc">主开发 IDE，内核配置/包管理/在线调试/烧录</div>
+      </div>
+    </div>
+    <div class="tool-item">
+      <div class="tool-icon">⎈</div>
+      <div class="tool-info">
+        <div class="tool-name">STM32CubeMX</div>
+        <div class="tool-desc">引脚/时钟/外设配置，生成 HAL 初始化代码</div>
+      </div>
+    </div>
+    <div class="tool-item">
+      <div class="tool-icon">⌘</div>
+      <div class="tool-info">
+        <div class="tool-name">Keil MDK</div>
+        <div class="tool-desc">ARM 编译/调试/性能分析/Flash 烧录</div>
+      </div>
+    </div>
+    <div class="tool-item">
+      <div class="tool-icon">⬡</div>
+      <div class="tool-info">
+        <div class="tool-name">SquareLine Studio</div>
+        <div class="tool-desc">v1.5.2 · LVGL 可视化 UI 设计器，拖拽生成 C 代码</div>
+      </div>
+    </div>
+    <div class="tool-item">
+      <div class="tool-icon">⎔</div>
+      <div class="tool-info">
+        <div class="tool-name">CodeArts Agent</div>
+        <div class="tool-desc">华为云 AI 编程助手，代码生成与智能补全</div>
+      </div>
+    </div>
+    <div class="tool-item">
+      <div class="tool-icon">△</div>
+      <div class="tool-info">
+        <div class="tool-name">Trae</div>
+        <div class="tool-desc">AI 驱动 IDE，PDF/文档/排版自动化生成</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 实测数据 ===== -->
+  <div class="section-title">实测数据</div>
+  <div class="test-grid">
+
+    <div class="test-card">
+      <div class="test-img-wrap">
+        <img src="images/tcp_iperf.png" alt="TCP 吞吐测试" onerror="this.style.display='none';this.parentNode.querySelector('.test-img-fallback').style.display='flex'">
+        <div class="test-img-fallback" style="display:none">
+          <span>截图待放入<br><small>images/tcp_iperf.png</small></span>
+        </div>
+      </div>
+      <div class="test-info">
+        <div class="test-title">TCP 吞吐测试</div>
+        <div class="test-desc">iperf3 实测 TCP 吞吐 7737 kbps（3000秒连续测试），ESP-Hosted SPI 37.5MHz 稳定传输</div>
+      </div>
+    </div>
+
+    <div class="test-card">
+      <div class="test-img-wrap">
+        <div class="img-carousel" id="lvgl-carousel">
+          <div class="carousel-slide active">
+            <img src="images/lvgl_fps_static.jpg" alt="LVGL 静态帧率" style="transform:rotate(90deg);object-fit:contain" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+            <div class="test-img-fallback" style="display:none;width:100%;height:100%;position:absolute;inset:0"><span>静态帧率截图<br><small>images/lvgl_fps_static.jpg</small></span></div>
+            <div class="carousel-caption"><span>静态 UI 帧率 45+ FPS</span></div>
+          </div>
+          <div class="carousel-slide">
+            <img src="images/lvgl_fps_dynamic.jpg" alt="LVGL 动态帧率" style="transform:rotate(90deg);object-fit:contain" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+            <div class="test-img-fallback" style="display:none;width:100%;height:100%;position:absolute;inset:0"><span>动态帧率截图<br><small>images/lvgl_fps_dynamic.jpg</small></span></div>
+            <div class="carousel-caption"><span>动态动画帧率 33+ FPS</span></div>
+          </div>
+          <div class="carousel-slide">
+            <img src="images/lvgl_partial_refresh.jpg" alt="LVGL 部分刷新" style="transform:rotate(90deg);object-fit:contain" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+            <div class="test-img-fallback" style="display:none;width:100%;height:100%;position:absolute;inset:0"><span>部分刷新截图<br><small>images/lvgl_partial_refresh.jpg</small></span></div>
+            <div class="carousel-caption"><span>双缓冲部分刷新（非全屏重绘）</span></div>
+          </div>
+          <button class="carousel-arrow prev" onclick="carouselPrev('lvgl-carousel')">&#8249;</button>
+          <button class="carousel-arrow next" onclick="carouselNext('lvgl-carousel')">&#8250;</button>
+          <div class="carousel-dots">
+            <span class="dot active" onclick="carouselGo('lvgl-carousel',0)"></span>
+            <span class="dot" onclick="carouselGo('lvgl-carousel',1)"></span>
+            <span class="dot" onclick="carouselGo('lvgl-carousel',2)"></span>
+          </div>
+        </div>
+      </div>
+      <div class="test-info">
+        <div class="test-title">LVGL 帧率测试</div>
+        <div class="test-desc">800×480 全屏双缓冲 + DMA2D 加速 + LTDC 行中断防撕裂；lv_timer_handler() 自适应刷新，静态 45+ FPS，动态 33+ FPS</div>
+      </div>
+    </div>
+
+    <div class="test-card">
+      <div class="test-img-wrap">
+        <img src="images/ota_mqtts_report.png" alt="华为云 MQTTS 属性上报" onerror="this.style.display='none';this.parentNode.querySelector('.test-img-fallback').style.display='flex'">
+        <div class="test-img-fallback" style="display:none">
+          <span>截图待放入<br><small>images/ota_mqtts_report.png</small></span>
+        </div>
+      </div>
+      <div class="test-info">
+        <div class="test-title">华为云 MQTTS 属性上报</div>
+        <div class="test-desc">MQTTS 加密连接 + HMAC-SHA256 设备认证，定时属性上报，OTA 运行时自动暂停上报</div>
+      </div>
+    </div>
+
+    <div class="test-card">
+      <div class="test-img-wrap">
+        <img src="images/ota_upgrade.png" alt="OTA 升级流程" onerror="this.style.display='none';this.parentNode.querySelector('.test-img-fallback').style.display='flex'">
+        <div class="test-img-fallback" style="display:none">
+          <span>截图待放入<br><small>images/ota_upgrade.png</small></span>
+        </div>
+      </div>
+      <div class="test-info">
+        <div class="test-title">OTA 远程固件升级</div>
+        <div class="test-desc">MQTT 通知升级 → HTTPS 分片下载 → 断点续传 → CRC32 校验 → Flash 写入 → 重启升级</div>
+      </div>
+    </div>
+
+
+    <div class="test-card">
+
+      <div class="test-img-wrap" style="background:linear-gradient(135deg,#0a1628,#0f1d32);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;padding:16px">
+        <div style="display:flex;align-items:center;gap:8px;width:100%;justify-content:center">
+          <div style="text-align:center;flex:1">
+            <div style="color:var(--text-dim);font-size:11px;margin-bottom:4px">MPU Cache 未配置</div>
+            <div style="color:#ef4444;font-size:18px;font-weight:700">TEX=0</div>
+            <div style="color:var(--text-dim);font-size:11px;margin-top:2px">SDRAM 强序访问</div>
+          </div>
+          <div style="color:var(--accent);font-size:20px">→</div>
+          <div style="text-align:center;flex:1">
+            <div style="color:var(--text-dim);font-size:11px;margin-bottom:4px">MPU Write-Back</div>
+            <div style="color:#22c55e;font-size:18px;font-weight:700">TEX=1 WB</div>
+            <div style="color:var(--text-dim);font-size:11px;margin-top:2px">Cache 命中加速</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;width:100%;justify-content:center">
+          <div style="text-align:center;flex:1">
+            <div style="color:var(--text-dim);font-size:11px;margin-bottom:4px">RCDDelay 调优前</div>
+            <div style="color:#ef4444;font-size:18px;font-weight:700">160ns</div>
+          </div>
+          <div style="color:var(--accent);font-size:20px">→</div>
+          <div style="text-align:center;flex:1">
+            <div style="color:var(--text-dim);font-size:11px;margin-bottom:4px">调优后</div>
+            <div style="color:#22c55e;font-size:18px;font-weight:700">30ns</div>
+            <div style="color:var(--accent);font-size:11px;margin-top:2px">随机访问提升 5.3×</div>
+          </div>
+        </div>
+      </div>
+      <div class="test-info">
+        <div class="test-title">SDRAM Cache 提升效果</div>
+        <div class="test-desc">MPU 配置 TEX=1 Write-Back 开启 SDRAM Cache，LVGL 渲染性能显著提升；RCDDelay 时序调优后随机访问延迟从 160ns 降至 30ns</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== 项目卡片列表 ===== -->
+  <div class="section-title">项目模块</div>
+
+  <!-- 卡片 1: 华为云 OTA -->
+  <div class="project-card" onclick="toggleCard(this)">
+    <div class="card-header">
+      <div class="card-icon blue">☁</div>
+      <div class="card-info">
+        <div class="card-name">华为云 IoT 通信与 OTA 升级系统</div>
+        <div class="card-tagline">MQTTS 属性上报 · HTTPS 分片下载 · 断点续传 · CRC32 校验</div>
+        <div class="card-tags">
+          <span class="tag">MQTT</span>
+          <span class="tag">mbedTLS</span>
+          <span class="tag">FAL</span>
+          <span class="tag">QSPI Flash</span>
+        </div>
+      </div>
+      <span class="card-arrow">›</span>
+    </div>
+    <div class="card-detail">
+      <div class="detail-inner">
+        <div class="detail-section">
+          <div class="detail-label">项目描述</div>
+          <p class="detail-text">基于华为云 IoT 平台的设备通信与远程升级系统。MQTT/MQTTS 协议实现设备认证与属性上报，OTA 升级采用 HTTPS 分片下载，支持断点续传与 CRC32 校验，确保固件安全可靠。</p>
+        </div>
+        <div class="detail-section">
+          <div class="detail-label">核心特性</div>
+          <ul class="feature-list">
+            <li>MQTT/MQTTS 双模式连接，HMAC-SHA256 设备认证</li>
+            <li>定时属性上报，OTA 运行时自动暂停上报</li>
+            <li>HTTPS 分片下载，支持断点续传</li>
+            <li>智能 Flash 擦除策略，优化擦除时间</li>
+            <li>CRC32 完整性校验 + 下载重试机制（最多 3 次）</li>
+            <li>OTA 状态持久化，断电恢复</li>
+          </ul>
+        </div>
+        <div class="detail-section">
+          <div class="detail-label">演示视频</div>
+          <div class="video-placeholder">
+            <div class="play-btn"></div>
+            <div class="label">视频待录制 · OTA 升级全流程演示</div>
+          </div>
+        </div>
+        <a class="gitee-btn" href="https://gitee.com/fszzh/huawei-cloud-bootloader" target="_blank">
+          查看源码（Bootloader）
+        </a>
+        <a class="gitee-btn" href="https://gitee.com/fszzh/huawei-cloud" target="_blank" style="margin-top:6px">
+          查看源码（APP）
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- 卡片 2: LVGL 图形界面 -->
+  <div class="project-card" onclick="toggleCard(this)">
+    <div class="card-header">
+      <div class="card-icon cyan">▣</div>
+      <div class="card-info">
+        <div class="card-name">LVGL 图形界面系统</div>
+        <div class="card-tagline">800×480 RGB565 · DMA2D 加速 · LTDC 防撕裂</div>
+        <div class="card-tags">
+          <span class="tag">LVGL 8.3</span>
+          <span class="tag">DMA2D</span>
+          <span class="tag">LTDC</span>
+          <span class="tag">GT911</span>
+        </div>
+      </div>
+      <span class="card-arrow">›</span>
+    </div>
+    <div class="card-detail">
+      <div class="detail-inner">
+        <div class="detail-section">
+          <div class="detail-label">项目描述</div>
+          <p class="detail-text">基于 LVGL v8.3.10 的嵌入式 GUI 系统，针对 STM32H743 优化。采用 SDRAM 双缓冲部分刷新，DMA2D 硬件加速颜色填充，LTDC 行中断同步彻底消除屏幕撕裂。lv_timer_handler() 自适应调度，静态时降低刷新频率减少 CPU 占用，动态时保持流畅响应。</p>
+        </div>
+        <div class="detail-section">
+          <div class="detail-label">核心特性</div>
+          <ul class="feature-list">
+            <li>800×480 RGB565 双缓冲部分刷新，SDRAM 8MB 显存</li>
+            <li>DMA2D 硬件加速，减轻 CPU 负担</li>
+            <li>LTDC 行中断同步，完全消除屏幕撕裂</li>
+            <li>GT911 电容触摸屏，中断模式读取</li>
+            <li>lv_timer_handler() 自适应调度，静态低频刷新降功耗，动态高频保流畅</li>
+            <li>自定义 LVGL 任务管理，独立内存池</li>
+          </ul>
+        </div>
+        <div class="detail-section">
+          <div class="detail-label">演示视频</div>
+          <div class="video-placeholder">
+            <div class="play-btn"></div>
+            <div class="label">视频待录制 · UI 界面操作演示</div>
+          </div>
+        </div>
+        <a class="gitee-btn" href="https://gitee.com/fszzh/huawei-cloud" target="_blank">
+          查看源码
+        </a>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- 卡片 4: WiFi 通信 -->
+  <div class="project-card" onclick="toggleCard(this)">
+    <div class="card-header">
+      <div class="card-icon green">📶</div>
+      <div class="card-info">
+        <div class="card-name">WiFi 无线通信系统</div>
+        <div class="card-tagline">ESP32-C6 从芯片 · ESP-Hosted SPI 37.5MHz</div>
+        <div class="card-tags">
+          <span class="tag">ESP32-C6</span>
+          <span class="tag">SPI</span>
+          <span class="tag">LwIP</span>
+          <span class="tag">7737kbps</span>
+        </div>
+      </div>
+      <span class="card-arrow">›</span>
+    </div>
+    <div class="card-detail">
+      <div class="detail-inner">
+        <div class="detail-section">
+          <div class="detail-label">项目描述</div>
+          <p class="detail-text">通过 ESP32-C6 从芯片实现 WiFi 连接，使用 ESP-Hosted 协议栈经 SPI 总线通信。实测 TCP 吞吐 7737 kbps（约 1MB/s），支撑视频流传输和 IoT 云通信。</p>
+        </div>
+        <div class="detail-section">
+          <div class="detail-label">核心特性</div>
+          <ul class="feature-list">
+            <li>ESP-Hosted SPI 37.5MHz，实测 TCP 吞吐 7737 kbps</li>
+            <li>完整 LwIP 网络栈，TCP/UDP 双支持</li>
+            <li>WiFi 自动连接 + 断线重连</li>
+            <li>NTP 时间同步</li>
+            <li>ping/ifconfig 等网络调试命令</li>
+          </ul>
+        </div>
+        <div class="detail-section">
+          <div class="detail-label">演示视频</div>
+          <div class="video-placeholder">
+            <div class="play-btn"></div>
+            <div class="label">视频待录制 · WiFi 连接与通信演示</div>
+          </div>
+        </div>
+        <a class="gitee-btn" href="https://gitee.com/fszzh/huawei-cloud" target="_blank">
+          查看源码
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- 卡片 5: 存储与驱动 -->
+  <div class="project-card" onclick="toggleCard(this)">
+    <div class="card-header">
+      <div class="card-icon purple">⚡</div>
+      <div class="card-info">
+        <div class="card-name">存储管理与硬件驱动</div>
+        <div class="card-tagline">SDRAM 32MB · QSPI Flash · FAL 分区 · MPU</div>
+        <div class="card-tags">
+          <span class="tag">SDRAM</span>
+          <span class="tag">QSPI</span>
+          <span class="tag">FAL</span>
+          <span class="tag">MPU</span>
+        </div>
+      </div>
+      <span class="card-arrow">›</span>
+    </div>
+    <div class="card-detail">
+      <div class="detail-inner">
+        <div class="detail-section">
+          <div class="detail-label">项目描述</div>
+          <p class="detail-text">完整的存储管理与内存调度子系统。链接脚本定义 5 区域内存布局，MPU 配置 4 区域独立 Cache 策略，多 RAM 混合调度让每种内存各司其职。修复了 SDRAM 时序关键 Bug（RCDDelay 160ns→30ns，提升 5.3 倍随机访问速度）。</p>
+        </div>
+        <div class="detail-section">
+          <div class="detail-label">核心特性</div>
+          <ul class="feature-list">
+            <li>链接脚本 5 区域内存布局：ROM(1.5MB) / DTCM(128KB) / AXI(512KB) / SDRAM(32MB) / SRAM4(64KB)</li>
+            <li>MPU 4 区域独立 Cache 策略：DTCM 零等待、AXI Write-Back、SRAM4 Non-Cacheable、SDRAM Write-Back</li>
+            <li>多 RAM 混合调度：DTCM 系统堆+栈 → AXI memheap 绑定 LVGL 内存池 → SRAM4 固定块内存池供 ESP-Hosted DMA → SDRAM 帧缓冲+JPEG 环形缓冲</li>
+            <li>AXI memheap locked=RT_TRUE，DTCM 满时 rt_malloc 自动回退到 AXI</li>
+            <li>SRAM4 rt_mp_t 固定块内存池，零碎片，spinlock 保护，ISR 安全</li>
+            <li>D-Cache 一致性管理：DMA2D/MDMA/LTDC/JPEG 四路并发 Clean + Invalidate</li>
+            <li>SDRAM 时序优化，RCDDelay 修复（5.3x 提升）</li>
+            <li>QBoot 释放标志预留 4KB，智能 Flash 擦除策略</li>
+            <li>LTDC 像素时钟优化至 40MHz</li>
+          </ul>
+        </div>
+        <div class="detail-section">
+          <div class="detail-label">演示视频</div>
+          <div class="video-placeholder">
+            <div class="play-btn"></div>
+            <div class="label">视频待录制 · 存储与性能演示</div>
+          </div>
+        </div>
+        <a class="gitee-btn" href="https://gitee.com/fszzh/huawei-cloud" target="_blank">
+          查看源码
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 底部 ===== -->
+  <div class="footer">
+    <div class="contact-row">
+      <a class="contact-btn" href="https://gitee.com/fszzh/huawei-cloud-bootloader" target="_blank" title="Bootloader 源码">⚡ Bootloader</a>
+      <a class="contact-btn" href="https://gitee.com/fszzh/huawei-cloud" target="_blank" title="APP 源码">⚡ APP</a>
+    </div>
+    <p class="copy">扫描二维码查看项目源码与演示视频</p>
+  </div>
+
+</div>
+
+<script>
+// 卡片展开/折叠
+function toggleCard(card) {
+  const wasActive = card.classList.contains('active');
+  document.querySelectorAll('.project-card').forEach(c => c.classList.remove('active'));
+  if (!wasActive) {
+    card.classList.add('active');
+  }
+}
+
+function carouselGo(id, idx) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const slides = el.querySelectorAll('.carousel-slide');
+  const dots = el.querySelectorAll('.carousel-dots .dot');
+  slides.forEach((s, i) => { s.classList.toggle('active', i === idx); });
+  dots.forEach((d, i) => { d.classList.toggle('active', i === idx); });
+}
+
+function carouselNext(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const slides = el.querySelectorAll('.carousel-slide');
+  let cur = [...slides].findIndex(s => s.classList.contains('active'));
+  carouselGo(id, (cur + 1) % slides.length);
+}
+
+function carouselPrev(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const slides = el.querySelectorAll('.carousel-slide');
+  let cur = [...slides].findIndex(s => s.classList.contains('active'));
+  carouselGo(id, (cur - 1 + slides.length) % slides.length);
+}
+</script>
+
+</body>
+</html>
