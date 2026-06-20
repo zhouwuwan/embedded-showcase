@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>ESP32-S3 WiFi 视频流终端</title>
+<style>
+:root {
+  --bg: #0a0e1a;
+  --bg-card: #131a2b;
+  --bg-card-hover: #1a2340;
+  --border: #1e293b;
+  --border-active: #06b6d4;
+  --text: #f1f5f9;
+  --text-dim: #64748b;
+  --text-mid: #94a3b8;
+  --accent: #06b6d4;
+  --accent-2: #3b82f6;
+  --warn: #f59e0b;
+  --success: #10b981;
+  --radius: 14px;
+  --shadow: 0 4px 24px rgba(0,0,0,0.4);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 20% 50%, rgba(6,182,212,0.06) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(59,130,246,0.05) 0%, transparent 50%),
+    linear-gradient(rgba(30,41,59,0.3) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(30,41,59,0.3) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.container {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 0 16px;
+  position: relative;
+  z-index: 1;
+}
+
+.header {
+  padding: 40px 0 28px;
+  text-align: center;
+}
+
+.header .avatar {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 16px;
+  font-size: 22px; font-weight: 700; color: #fff;
+  box-shadow: 0 0 24px rgba(6,182,212,0.3);
+}
+
+.header h1 {
+  font-size: 22px; font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.header .title {
+  display: inline-block;
+  font-size: 13px;
+  color: var(--accent);
+  background: rgba(6,182,212,0.1);
+  border: 1px solid rgba(6,182,212,0.3);
+  padding: 3px 12px;
+  border-radius: 20px;
+  margin-bottom: 10px;
+}
+
+.header .bio {
+  font-size: 14px;
+  color: var(--text-mid);
+  max-width: 380px;
+  margin: 0 auto;
+}
+
+.stats {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  padding: 16px 0;
+  margin-bottom: 8px;
+}
+
+.stat-item { text-align: center; }
+
+.stat-item .num {
+  font-size: 24px; font-weight: 700;
+  color: var(--accent);
+  font-family: "SF Mono", "Fira Code", monospace;
+}
+
+.stat-item .label {
+  font-size: 11px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.section-title {
+  font-size: 13px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin: 24px 0 14px;
+  display: flex; align-items: center; gap: 8px;
+}
+
+.section-title::before {
+  content: '';
+  width: 3px; height: 14px;
+  background: var(--accent);
+  border-radius: 2px;
+}
+
+.overview {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  margin-bottom: 20px;
+}
+
+.overview-text {
+  font-size: 13px;
+  color: var(--text-mid);
+  line-height: 1.8;
+}
+
+.overview-text strong { color: var(--text); }
+
+.highlight-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 16px 0 6px;
+}
+
+.highlight-item {
+  flex: 1;
+  text-align: center;
+  background: rgba(6,182,212,0.06);
+  border: 1px solid rgba(6,182,212,0.15);
+  border-radius: 10px;
+  padding: 12px 6px;
+}
+
+.highlight-num {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--accent);
+  font-family: "SF Mono", "Fira Code", monospace;
+  margin-bottom: 4px;
+}
+
+.highlight-label {
+  font-size: 10px;
+  color: var(--text-dim);
+  line-height: 1.4;
+}
+
+.highlight-sub { color: var(--text-dim); opacity: 0.7; }
+
+.tech-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.tech-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  text-align: center;
+}
+
+.tech-item .tech-name { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+.tech-item .tech-ver { font-size: 10px; color: var(--text-dim); font-family: "SF Mono", monospace; }
+
+.test-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.test-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.test-img-wrap {
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: #000;
+  overflow: hidden;
+  position: relative;
+}
+
+.test-img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.test-img-fallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-dim);
+  font-size: 13px;
+  text-align: center;
+  background: rgba(6,182,212,0.04);
+  border: 1px dashed var(--border);
+}
+
+.test-img-fallback small { color: var(--accent); }
+
+.test-info { padding: 12px 14px; }
+.test-title { font-size: 13px; font-weight: 600; margin-bottom: 3px; }
+.test-desc { font-size: 11px; color: var(--text-dim); line-height: 1.5; }
+
+.project-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 14px;
+  overflow: hidden;
+  transition: border-color 0.3s, transform 0.2s;
+  cursor: pointer;
+}
+
+.project-card:active { transform: scale(0.98); }
+
+.project-card.active {
+  border-color: var(--border-active);
+  box-shadow: 0 0 0 1px rgba(6,182,212,0.2), var(--shadow);
+}
+
+.card-header {
+  padding: 18px 18px 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.card-icon {
+  width: 44px; height: 44px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.card-icon.blue { background: rgba(59,130,246,0.15); color: #60a5fa; }
+.card-icon.cyan { background: rgba(6,182,212,0.15); color: #22d3ee; }
+.card-icon.amber { background: rgba(245,158,11,0.15); color: #fbbf24; }
+.card-icon.green { background: rgba(16,185,129,0.15); color: #34d399; }
+.card-icon.purple { background: rgba(139,92,246,0.15); color: #a78bfa; }
+
+.card-info { flex: 1; min-width: 0; }
+.card-name { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+.card-tagline { font-size: 12px; color: var(--text-mid); margin-bottom: 8px; }
+.card-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+
+.tag {
+  font-size: 10px;
+  font-family: "SF Mono", "Fira Code", monospace;
+  color: var(--text-dim);
+  background: rgba(30,41,59,0.6);
+  border: 1px solid var(--border);
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+.card-arrow {
+  color: var(--text-dim);
+  font-size: 14px;
+  transition: transform 0.3s;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+.project-card.active .card-arrow { transform: rotate(90deg); color: var(--accent); }
+
+.card-detail {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease;
+}
+
+.project-card.active .card-detail { max-height: 2000px; }
+
+.detail-inner {
+  padding: 0 18px 18px;
+  border-top: 1px solid var(--border);
+  margin-top: 0;
+}
+
+.detail-section { padding-top: 14px; }
+
+.detail-label {
+  font-size: 11px;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.detail-text { font-size: 13px; color: var(--text-mid); line-height: 1.7; }
+
+.feature-list { list-style: none; }
+
+.feature-list li {
+  font-size: 13px;
+  color: var(--text-mid);
+  padding: 5px 0;
+  padding-left: 18px;
+  position: relative;
+}
+
+.feature-list li::before {
+  content: '\25B8';
+  position: absolute;
+  left: 0;
+  color: var(--accent);
+}
+
+.video-placeholder {
+  background: #000;
+  border-radius: 10px;
+  aspect-ratio: 16/9;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 12px 0;
+  border: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+}
+
+.video-placeholder::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(6,182,212,0.08) 0%, transparent 70%);
+}
+
+.play-btn {
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  background: rgba(6,182,212,0.2);
+  border: 2px solid var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1;
+}
+
+.play-btn::after {
+  content: '';
+  width: 0; height: 0;
+  border-left: 14px solid var(--accent);
+  border-top: 9px solid transparent;
+  border-bottom: 9px solid transparent;
+  margin-left: 4px;
+}
+
+.video-placeholder .label { font-size: 12px; color: var(--text-dim); z-index: 1; }
+
+.gitee-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  margin-top: 14px;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.gitee-btn:active { transform: scale(0.97); opacity: 0.9; }
+
+.footer {
+  text-align: center;
+  padding: 30px 0 40px;
+  border-top: 1px solid var(--border);
+  margin-top: 20px;
+}
+
+.footer .contact-row {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.contact-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 18px;
+  border-radius: 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  text-decoration: none;
+  font-size: 13px;
+  color: var(--text-mid);
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.contact-btn:active { border-color: var(--accent); color: var(--accent); }
+
+.footer .copy { font-size: 11px; color: var(--text-dim); }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.project-card { animation: fadeUp 0.4s ease backwards; }
+.project-card:nth-child(1) { animation-delay: 0.05s; }
+.project-card:nth-child(2) { animation-delay: 0.1s; }
+.project-card:nth-child(3) { animation-delay: 0.15s; }
+
+@media (min-width: 768px) {
+  .container { max-width: 720px; padding: 0 24px; }
+  .header h1 { font-size: 28px; }
+  .header .bio { font-size: 15px; }
+  .card-name { font-size: 16px; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="header">
+    <div class="avatar">S3</div>
+    <h1>ESP32-S3 WiFi 视频流终端</h1>
+    <div class="title">ESP32-S3 · ESP-IDF v6.0.1 · JPEG 硬解</div>
+    <p class="bio">基于 ESP32-S3 的 WiFi 视频流接收与显示终端，双核流水线架构，自研 Captive Portal 配网方案</p>
+  </div>
+
+  <div class="stats">
+    <div class="stat-item">
+      <div class="num">2核</div>
+      <div class="label">CPU 核心</div>
+    </div>
+    <div class="stat-item">
+      <div class="num">240M</div>
+      <div class="label">主频 Hz</div>
+    </div>
+    <div class="stat-item">
+      <div class="num">16MB</div>
+      <div class="label">Flash</div>
+    </div>
+    <div class="stat-item">
+      <div class="num">8MB</div>
+      <div class="label">PSRAM</div>
+    </div>
+  </div>
+
+  <div class="overview">
+    <div class="overview-text">
+      基于 ESP32-S3 的 WiFi 视频流接收与显示终端。<strong>双核流水线架构</strong>，Core 0 负责网络接收，Core 1 负责 JPEG 硬件解码，通过计数信号量与原子变量实现零锁生产者-消费者模型。<strong>PSRAM 多级内存规划</strong>，DMA 缓冲区专用对齐分配 + rgb_buf0 复用 LCD draw_buf 零拷贝，总计 444KB+ PSRAM 精细调度。<strong>自研 Captive Portal 配网方案</strong>，SoftAP + DNS 劫持 + DHCP Option 114，无需 APP 即可完成 WiFi 配置。
+    </div>
+    <div class="highlight-row">
+      <div class="highlight-item">
+        <div class="highlight-num">320x240</div>
+        <div class="highlight-label">SPI LCD 显示<br><span class="highlight-sub">ST7789 80MHz</span></div>
+      </div>
+      <div class="highlight-item">
+        <div class="highlight-num">444KB+</div>
+        <div class="highlight-label">PSRAM 精细调度<br><span class="highlight-sub">DMA 对齐 + 零拷贝</span></div>
+      </div>
+      <div class="highlight-item">
+        <div class="highlight-num">Captive</div>
+        <div class="highlight-label">Portal 配网<br><span class="highlight-sub">DNS 劫持 + DHCP 114</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">技术栈</div>
+  <div class="tech-grid">
+    <div class="tech-item"><div class="tech-name">ESP-IDF</div><div class="tech-ver">v6.0.1</div></div>
+    <div class="tech-item"><div class="tech-name">ESP32-S3</div><div class="tech-ver">双核 240MHz</div></div>
+    <div class="tech-item"><div class="tech-name">esp_new_jpeg</div><div class="tech-ver">硬件 JPEG 解码</div></div>
+    <div class="tech-item"><div class="tech-name">ST7789</div><div class="tech-ver">SPI LCD 320x240</div></div>
+    <div class="tech-item"><div class="tech-name">XL9555</div><div class="tech-ver">I2C 16位 IO 扩展</div></div>
+    <div class="tech-item"><div class="tech-name">PSRAM</div><div class="tech-ver">OCT 8线 80MHz</div></div>
+    <div class="tech-item"><div class="tech-name">LwIP</div><div class="tech-ver">TCP/UDP 协议栈</div></div>
+    <div class="tech-item"><div class="tech-name">ESP Console</div><div class="tech-ver">argtable3 命令行</div></div>
+    <div class="tech-item"><div class="tech-name">NVS</div><div class="tech-ver">WiFi 凭据持久化</div></div>
+    <div class="tech-item"><div class="tech-name">HTTP Server</div><div class="tech-ver">配网 Web 服务</div></div>
+  </div>
+
+  <div class="section-title">实测效果</div>
+  <div class="test-grid">
+
+    <div class="test-card">
+      <div class="test-img-wrap">
+        <img src="images/esp32_video_stream.jpg" alt="视频流播放" onerror="this.style.display='none';this.parentNode.querySelector('.test-img-fallback').style.display='flex'">
+        <div class="test-img-fallback" style="display:none">
+          <span>截图待放入<br><small>images/esp32_video_stream.jpg</small></span>
+        </div>
+      </div>
+      <div class="test-info">
+        <div class="test-title">MJPEG 视频流实时显示</div>
+        <div class="test-desc">TCP 接收 MJPEG 帧 -> JPEG 硬件解码 -> RGB565 双缓冲 -> SPI LCD DMA 显示</div>
+      </div>
+    </div>
+
+    <div class="test-card">
+      <div class="test-img-wrap">
+        <img src="images/esp32_wifi_prov.jpg" alt="WiFi 配网" onerror="this.style.display='none';this.parentNode.querySelector('.test-img-fallback').style.display='flex'">
+        <div class="test-img-fallback" style="display:none">
+          <span>截图待放入<br><small>images/esp32_wifi_prov.jpg</small></span>
+        </div>
+      </div>
+      <div class="test-info">
+        <div class="test-title">Captive Portal 配网</div>
+        <div class="test-desc">SoftAP + DNS 劫持 + DHCP Option 114，手机自动弹出配网页面，中文界面</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="section-title">模块详情</div>
+
+  <div class="project-card" onclick="toggleCard(this)">
+    <div class="card-header">
+      <div class="card-icon amber">&#9654;</div>
+      <div class="card-info">
+        <div class="card-name">MJPEG 视频流接收与解码</div>
+        <div class="card-tagline">TCP 帧协议 · JPEG 硬件解码 · 双缓冲流水线</div>
+        <div class="card-tags">
+          <span class="tag">JPEG 硬解</span>
+          <span class="tag">TCP</span>
+          <span class="tag">DMA</span>
+          <span class="tag">双核流水线</span>
+        </div>
+      </div>
+      <span class="card-arrow">&#8250;</span>
+    </div>
+    <div class="card-detail">
+      <div class="detail-inner">
+        <div class="detail-section">
+          <div class="detail-label">项目描述</div>
+          <p class="detail-text">三任务流水线架构实现 MJPEG 视频流实时显示。TCP 服务端监听连接，接收任务解析帧协议获取 JPEG 数据，解码任务利用 ESP32-S3 硬件 JPEG 解码器转换为 RGB565，通过 SPI DMA 异步写入 LCD。双 RGB 缓冲区实现解码与 DMA 传输并行。</p>
+        </div>
+        <div class="detail-section">
+          <div class="detail-label">PSRAM 内存规划</div>
+          <ul class="feature-list">
+            <li>LCD draw_buf 150KB 分配至 PSRAM，spi_bus_dma_memory_alloc 确保 DMA 对齐与 Cache 一致性</li>
+            <li>rgb_buf0 复用 LCD draw_buf，JPEG 解码输出零拷贝直送 SPI 传输</li>
+            <li>rgb_buf1 新增 150KB，heap_caps_aligned_alloc(16) + MALLOC_CAP_DMA 双缓冲交替</li>
+            <li>4 个 JPEG 缓冲区共 128KB，显式指定 PSRAM 避免 32KB 分配落入内部 RAM</li>
+            <li>CONFIG_SPIRAM_MALLOC_ALWAYSINTERNAL=8192，小对象留内部 RAM 保实时性</li>
+            <li>WiFi/LwIP 缓冲区自动分配至 PSRAM，内部 RAM 预留 32KB 防挤占</li>
+          </ul>
+        </div>
+        <div class="detail-section">
+          <div class="detail-label">网络层与帧协议</div>
+          <ul class="feature-list">
+            <li>TCP_NODELAY 禁用 Nagle，SO_RCVBUF 扩至 32KB，应用层 16KB 滑动窗口</li>
+            <li>帧协议：4 字节小端长度头 + JPEG 数据，SOI/EOI 双标记校验</li>
+            <li>三级帧同步恢复：find_frame_sync（长度+SOI+EOI 三重验证）→ find_jpeg_soi → find_eoi_in_frame 截断恢复</li>
+            <li>4 缓冲区计数信号量 + 原子索引无锁同步，Xtensa memw 内存屏障确保跨核可见</li>
+            <li>解码慢于接收时清空信号量队列跳帧，只解码最新帧，宁可丢帧不延迟</li>
+            <li>LwIP 高速重传 + 乱序段排队，TCP 吞吐量测试含逐字节递增校验</li>
+          </ul>
+        </div>
+        <div class="detail-section">
+          <div class="detail-label">演示视频</div>
+          <div class="video-placeholder">
+            <div class="play-btn"></div>
+            <div class="label">视频待录制 · 视频流播放演示</div>
+          </div>
+        </div>
+        <a class="gitee-btn" href="https://gitee.com/fszzh/esp32-s3-video-terminal" target="_blank">
+          查看源码
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="project-card" onclick="toggleCard(this)">
+    <div class="card-header">
+      <div class="card-icon green">&#128246;</div>
+      <div class="card-info">
+        <div class="card-name">WiFi 配网与通信</div>
+        <div class="card-tagline">Captive Portal · 串口配网 · DNS 劫持 · DHCP Option 114</div>
+        <div class="card-tags">
+          <span class="tag">SoftAP</span>
+          <span class="tag">HTTP Server</span>
+          <span class="tag">DNS</span>
+          <span class="tag">NVS</span>
+          <span class="tag">Console</span>
+        </div>
+      </div>
+      <span class="card-arrow">&#8250;</span>
+    </div>
+    <div class="card-detail">
+      <div class="detail-inner">
+        <div class="detail-section">
+          <div class="detail-label">项目描述</div>
+          <p class="detail-text">支持串口命令行与热点 Web 两种配网方式，覆盖开发调试与最终用户场景。Captive Portal 方案不依赖 ESP-IDF provisioning 框架，设备启动 SoftAP 后，DNS 服务器将所有域名劫持到 AP 地址，DHCP Option 114 通知客户端配网 URI，手机/电脑自动弹出配网页面。配网成功后凭据存入 NVS，后续上电自动连接。</p>
+        </div>
+        <div class="detail-section">
+          <div class="detail-label">核心特性</div>
+          <ul class="feature-list">
+            <li>串口命令行配网：join &lt;SSID&gt; &lt;PASSWORD&gt;，开发调试首选</li>
+            <li>热点 Web 配网：prov start 启动 Captive Portal，最终用户无需串口</li>
+            <li>自动配网策略：上电读取 NVS 凭据自动连接，失败则启动热点配网</li>
+            <li>SoftAP + HTTP Server + DNS 劫持，无需安装 APP</li>
+            <li>DHCP Option 114，手机自动弹出配网页面</li>
+            <li>404 请求 303 重定向，确保所有 HTTP 请求跳转配网页</li>
+            <li>中文配网界面，移动端适配，WiFi 扫描列表选择</li>
+            <li>NVS 凭据持久化，最多重试 5 次，配网成功后自动关闭热点</li>
+            <li>STA+AP 双模式，配网与通信可并行</li>
+          </ul>
+        </div>
+        <div class="detail-section">
+          <div class="detail-label">演示视频</div>
+          <div class="video-placeholder">
+            <div class="play-btn"></div>
+            <div class="label">视频待录制 · WiFi 配网演示</div>
+          </div>
+        </div>
+        <a class="gitee-btn" href="https://gitee.com/fszzh/esp32-s3-video-terminal" target="_blank">
+          查看源码
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="project-card" onclick="toggleCard(this)">
+    <div class="card-header">
+      <div class="card-icon purple">&#9881;</div>
+      <div class="card-info">
+        <div class="card-name">外设驱动与板级支持</div>
+        <div class="card-tagline">SPI LCD · I2C IO 扩展 · 16MB 分区 · 串口命令行</div>
+        <div class="card-tags">
+          <span class="tag">ST7789</span>
+          <span class="tag">XL9555</span>
+          <span class="tag">PSRAM</span>
+          <span class="tag">Console</span>
+        </div>
+      </div>
+      <span class="card-arrow">&#8250;</span>
+    </div>
+    <div class="card-detail">
+      <div class="detail-inner">
+        <div class="detail-section">
+          <div class="detail-label">项目描述</div>
+          <p class="detail-text">ESP32-S3 板级驱动层，包括 SPI LCD（ST7789 320x240 80MHz 像素时钟）、I2C IO 扩展器 XL9555（控制 LCD 电源/背光/复位、摄像头、按键）、PSRAM OCT 8 线 80MHz、16MB Flash 自定义分区表（双 OTA 3MB + FAT 存储 8.44MB）。串口命令行提供 6 个子命令模块，覆盖 LCD 测试、网络吞吐量测试、视频流控制等。</p>
+        </div>
+        <div class="detail-section">
+          <div class="detail-label">核心特性</div>
+          <ul class="feature-list">
+            <li>ST7789 SPI LCD，80MHz 像素时钟，PSRAM DMA 全屏缓冲</li>
+            <li>XL9555 I2C 16 位 IO 扩展，管理 LCD/摄像头/按键</li>
+            <li>PSRAM OCT 8 线 80MHz，DMA 对齐分配</li>
+            <li>16MB Flash 分区：factory 1.5MB + 双 OTA 3MB + FAT 8.44MB</li>
+            <li>ESP Console + argtable3，6 个命令模块</li>
+            <li>TCP/UDP 吞吐量测试，含丢包/乱序/重复检测</li>
+          </ul>
+        </div>
+        <a class="gitee-btn" href="https://gitee.com/fszzh/esp32-s3-video-terminal" target="_blank">
+          查看源码
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="contact-row">
+      <a class="contact-btn" href="https://gitee.com/fszzh/esp32-s3-video-terminal" target="_blank" title="ESP32-S3 源码">查看源码</a>
+    </div>
+    <p class="copy">扫描二维码查看项目源码与演示视频</p>
+  </div>
+
+</div>
+
+<script>
+function toggleCard(card) {
+  const wasActive = card.classList.contains('active');
+  document.querySelectorAll('.project-card').forEach(c => c.classList.remove('active'));
+  if (!wasActive) {
+    card.classList.add('active');
+  }
+}
+</script>
+
+</body>
+</html>

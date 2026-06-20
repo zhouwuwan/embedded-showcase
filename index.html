@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>嵌入式项目作品集</title>
+<title>STM32H743 项目作品集</title>
 <style>
 /* ===== 主题变量 ===== */
 :root {
@@ -636,14 +636,18 @@ body::before {
 }
 
 .contact-btn {
-  width: 42px; height: 42px;
-  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 18px;
+  border-radius: 20px;
   background: var(--bg-card);
   border: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: center;
   text-decoration: none;
-  font-size: 18px;
-  transition: border-color 0.2s;
+  font-size: 13px;
+  color: var(--text-mid);
+  transition: border-color 0.2s, color 0.2s;
 }
 
 .contact-btn:active { border-color: var(--accent); }
@@ -673,6 +677,8 @@ body::before {
   .header .bio { font-size: 15px; }
   .card-name { font-size: 16px; }
 }
+
+
 </style>
 </head>
 <body>
@@ -682,7 +688,7 @@ body::before {
   <!-- ===== 个人简介 ===== -->
   <div class="header">
     <div class="avatar">嵌入式</div>
-    <h1>嵌入式项目作品集</h1>
+    <h1>STM32H743 项目作品集</h1>
     <div class="title">STM32H743 · RT-Thread · LVGL</div>
     <p class="bio">以 STM32H743 为核心的自研嵌入式综合平台，集成华为云 IoT OTA、LVGL 图形界面、WiFi 无线通信于一体</p>
   </div>
@@ -1112,8 +1118,8 @@ body::before {
   <!-- ===== 底部 ===== -->
   <div class="footer">
     <div class="contact-row">
-      <a class="contact-btn" href="https://gitee.com/fszzh/huawei-cloud-bootloader" target="_blank" title="Bootloader 源码">⚡ Bootloader</a>
-      <a class="contact-btn" href="https://gitee.com/fszzh/huawei-cloud" target="_blank" title="APP 源码">⚡ APP</a>
+      <a class="contact-btn" href="https://gitee.com/fszzh/huawei-cloud-bootloader" target="_blank" title="Bootloader 源码">Bootloader</a>
+      <a class="contact-btn" href="https://gitee.com/fszzh/huawei-cloud" target="_blank" title="APP 源码">APP</a>
     </div>
     <p class="copy">扫描二维码查看项目源码与演示视频</p>
   </div>
