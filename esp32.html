@@ -300,13 +300,30 @@ body::before {
 
 .card-arrow {
   color: var(--text-dim);
-  font-size: 14px;
+  font-size: 16px;
   transition: transform 0.3s;
   flex-shrink: 0;
   margin-top: 4px;
+  animation: arrowPulse 2s ease-in-out infinite;
 }
 
-.project-card.active .card-arrow { transform: rotate(90deg); color: var(--accent); }
+@keyframes arrowPulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+.project-card.active .card-arrow { transform: rotate(90deg); color: var(--accent); animation: none; }
+
+.card-expand-hint {
+  font-size: 11px;
+  color: var(--text-dim);
+  text-align: center;
+  padding: 6px 0 10px;
+  opacity: 0.7;
+  letter-spacing: 1px;
+}
+
+.project-card.active .card-expand-hint { display: none; }
 
 .card-detail {
   max-height: 0;
@@ -577,6 +594,7 @@ body::before {
       </div>
       <span class="card-arrow">&#8250;</span>
     </div>
+    <div class="card-expand-hint">点击展开详情</div>
     <div class="card-detail">
       <div class="detail-inner">
         <div class="detail-section">
@@ -635,6 +653,7 @@ body::before {
       </div>
       <span class="card-arrow">&#8250;</span>
     </div>
+    <div class="card-expand-hint">点击展开详情</div>
     <div class="card-detail">
       <div class="detail-inner">
         <div class="detail-section">
@@ -684,6 +703,7 @@ body::before {
       </div>
       <span class="card-arrow">&#8250;</span>
     </div>
+    <div class="card-expand-hint">点击展开详情</div>
     <div class="card-detail">
       <div class="detail-inner">
         <div class="detail-section">
