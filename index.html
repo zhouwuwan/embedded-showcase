@@ -303,12 +303,16 @@ body::before {
   align-items: center;
   justify-content: center;
   z-index: 2;
-  opacity: 0;
+  opacity: 0.7;
   transition: opacity 0.2s;
 }
 
 .img-carousel:hover .carousel-arrow {
   opacity: 1;
+}
+
+.img-carousel .carousel-arrow:active {
+  opacity: 0.5;
 }
 
 .carousel-arrow.prev { left: 6px; }
@@ -886,9 +890,23 @@ body::before {
 
     <div class="test-card">
       <div class="test-img-wrap">
-        <img src="images/ota_upgrade.png" alt="OTA 升级流程" onerror="this.style.display='none';this.parentNode.querySelector('.test-img-fallback').style.display='flex'">
-        <div class="test-img-fallback" style="display:none">
-          <span>截图待放入<br><small>images/ota_upgrade.png</small></span>
+        <div class="img-carousel" id="ota-test-carousel">
+          <div class="carousel-slide active">
+            <img src="images/ota_success.png" alt="OTA 升级成功" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+            <div class="test-img-fallback" style="display:none;width:100%;height:100%;position:absolute;inset:0"><span>OTA 升级成功截图<br><small>images/ota_success.png</small></span></div>
+            <div class="carousel-caption"><span>OTA 升级成功</span></div>
+          </div>
+          <div class="carousel-slide">
+            <img src="images/ota_reboot.png" alt="OTA 自动重启" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+            <div class="test-img-fallback" style="display:none;width:100%;height:100%;position:absolute;inset:0"><span>OTA 自动重启截图<br><small>images/ota_reboot.png</small></span></div>
+            <div class="carousel-caption"><span>OTA 成功后自动重启</span></div>
+          </div>
+          <button class="carousel-arrow prev" onclick="carouselPrev('ota-test-carousel')">&#8249;</button>
+          <button class="carousel-arrow next" onclick="carouselNext('ota-test-carousel')">&#8250;</button>
+          <div class="carousel-dots">
+            <span class="dot active" onclick="carouselGo('ota-test-carousel',0)"></span>
+            <span class="dot" onclick="carouselGo('ota-test-carousel',1)"></span>
+          </div>
         </div>
       </div>
       <div class="test-info">
@@ -973,10 +991,30 @@ body::before {
           </ul>
         </div>
         <div class="detail-section">
-          <div class="detail-label">演示视频</div>
-          <div class="video-placeholder">
-            <div class="play-btn"></div>
-            <div class="label">视频待录制 · OTA 升级全流程演示</div>
+          <div class="detail-label">OTA 升级实测</div>
+          <div class="img-carousel" id="ota-carousel">
+            <div class="carousel-slide active">
+              <img src="images/ota_mqtts_report.png" alt="MQTTS 属性上报" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+              <div class="test-img-fallback" style="display:none;width:100%;height:100%;position:absolute;inset:0"><span>MQTTS 属性上报截图<br><small>images/ota_mqtts_report.png</small></span></div>
+              <div class="carousel-caption"><span>MQTTS 属性上报</span></div>
+            </div>
+            <div class="carousel-slide">
+              <img src="images/ota_success.png" alt="OTA 升级成功" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+              <div class="test-img-fallback" style="display:none;width:100%;height:100%;position:absolute;inset:0"><span>OTA 升级成功截图<br><small>images/ota_success.png</small></span></div>
+              <div class="carousel-caption"><span>OTA 升级成功</span></div>
+            </div>
+            <div class="carousel-slide">
+              <img src="images/ota_reboot.png" alt="OTA 自动重启" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+              <div class="test-img-fallback" style="display:none;width:100%;height:100%;position:absolute;inset:0"><span>OTA 自动重启截图<br><small>images/ota_reboot.png</small></span></div>
+              <div class="carousel-caption"><span>OTA 成功后自动重启</span></div>
+            </div>
+            <button class="carousel-arrow prev" onclick="carouselPrev('ota-carousel')">&#8249;</button>
+            <button class="carousel-arrow next" onclick="carouselNext('ota-carousel')">&#8250;</button>
+            <div class="carousel-dots">
+              <span class="dot active" onclick="carouselGo('ota-carousel',0)"></span>
+              <span class="dot" onclick="carouselGo('ota-carousel',1)"></span>
+              <span class="dot" onclick="carouselGo('ota-carousel',2)"></span>
+            </div>
           </div>
         </div>
         <a class="gitee-btn" href="https://gitee.com/fszzh/huawei-cloud-bootloader" target="_blank">
@@ -1025,10 +1063,10 @@ body::before {
         </div>
         <div class="detail-section">
           <div class="detail-label">演示视频</div>
-          <div class="video-placeholder">
-            <div class="play-btn"></div>
-            <div class="label">视频待录制 · UI 界面操作演示</div>
-          </div>
+          <video controls style="width:100%;border-radius:10px;background:#000">
+            <source src="images/lvgl_demo.mp4" type="video/mp4">
+            浏览器不支持视频播放
+          </video>
         </div>
         <a class="gitee-btn" href="https://gitee.com/fszzh/huawei-cloud" target="_blank">
           查看源码
@@ -1071,13 +1109,7 @@ body::before {
             <li>ping/ifconfig 等网络调试命令</li>
           </ul>
         </div>
-        <div class="detail-section">
-          <div class="detail-label">演示视频</div>
-          <div class="video-placeholder">
-            <div class="play-btn"></div>
-            <div class="label">视频待录制 · WiFi 连接与通信演示</div>
-          </div>
-        </div>
+
         <a class="gitee-btn" href="https://gitee.com/fszzh/huawei-cloud" target="_blank">
           查看源码
         </a>
@@ -1122,13 +1154,7 @@ body::before {
             <li>LTDC 像素时钟优化至 40MHz</li>
           </ul>
         </div>
-        <div class="detail-section">
-          <div class="detail-label">演示视频</div>
-          <div class="video-placeholder">
-            <div class="play-btn"></div>
-            <div class="label">视频待录制 · 存储与性能演示</div>
-          </div>
-        </div>
+
         <a class="gitee-btn" href="https://gitee.com/fszzh/huawei-cloud" target="_blank">
           查看源码
         </a>
