@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Linux V4L2 摄像头驱动库</title>
+<style>
+:root {
+  --bg: #0a0e1a;
+  --bg-card: #131a2b;
+  --border: #1e293b;
+  --border-active: #06b6d4;
+  --text: #f1f5f9;
+  --text-dim: #64748b;
+  --text-mid: #94a3b8;
+  --accent: #06b6d4;
+  --accent-2: #3b82f6;
+  --radius: 14px;
+  --shadow: 0 4px 24px rgba(0,0,0,0.4);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 20% 50%, rgba(6,182,212,0.06) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(59,130,246,0.05) 0%, transparent 50%),
+    linear-gradient(rgba(30,41,59,0.3) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(30,41,59,0.3) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.container {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 0 16px;
+  position: relative;
+  z-index: 1;
+}
+
+.header {
+  padding: 40px 0 28px;
+  text-align: center;
+}
+
+.header .avatar {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 16px;
+  font-size: 22px; font-weight: 700; color: #fff;
+  box-shadow: 0 0 24px rgba(6,182,212,0.3);
+}
+
+.header h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+
+.header .title {
+  display: inline-block;
+  font-size: 13px;
+  color: var(--accent);
+  background: rgba(6,182,212,0.1);
+  border: 1px solid rgba(6,182,212,0.3);
+  padding: 3px 12px;
+  border-radius: 20px;
+  margin-bottom: 10px;
+}
+
+.header .bio { font-size: 14px; color: var(--text-mid); max-width: 380px; margin: 0 auto; }
+
+.stats {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  padding: 16px 0;
+  margin-bottom: 8px;
+}
+
+.stat-item { text-align: center; }
+
+.stat-item .num {
+  font-size: 24px; font-weight: 700;
+  color: var(--accent);
+  font-family: "SF Mono", "Fira Code", monospace;
+}
+
+.stat-item .label { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
+
+.section-title {
+  font-size: 13px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin: 24px 0 14px;
+  display: flex; align-items: center; gap: 8px;
+}
+
+.section-title::before {
+  content: '';
+  width: 3px; height: 14px;
+  background: var(--accent);
+  border-radius: 2px;
+}
+
+.overview {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  margin-bottom: 20px;
+}
+
+.overview-text { font-size: 13px; color: var(--text-mid); line-height: 1.8; }
+.overview-text strong { color: var(--text); }
+
+.highlight-row { display: flex; justify-content: space-between; gap: 8px; margin: 16px 0 6px; }
+
+.highlight-item {
+  flex: 1; text-align: center;
+  background: rgba(6,182,212,0.06);
+  border: 1px solid rgba(6,182,212,0.15);
+  border-radius: 10px;
+  padding: 12px 6px;
+}
+
+.highlight-num { font-size: 20px; font-weight: 700; color: var(--accent); font-family: "SF Mono", "Fira Code", monospace; margin-bottom: 4px; }
+.highlight-label { font-size: 10px; color: var(--text-dim); line-height: 1.4; }
+.highlight-sub { color: var(--text-dim); opacity: 0.7; }
+
+.tech-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; }
+
+.tech-item { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 12px; text-align: center; }
+.tech-item .tech-name { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+.tech-item .tech-ver { font-size: 10px; color: var(--text-dim); font-family: "SF Mono", monospace; }
+
+.project-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 14px;
+  overflow: hidden;
+  transition: border-color 0.3s, transform 0.2s;
+  cursor: pointer;
+}
+
+.project-card:active { transform: scale(0.98); }
+.project-card.active { border-color: var(--border-active); box-shadow: 0 0 0 1px rgba(6,182,212,0.2), var(--shadow); }
+
+.card-header { padding: 18px 18px 16px; display: flex; align-items: flex-start; gap: 14px; }
+
+.card-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+.card-icon.blue { background: rgba(59,130,246,0.15); color: #60a5fa; }
+.card-icon.cyan { background: rgba(6,182,212,0.15); color: #22d3ee; }
+.card-icon.amber { background: rgba(245,158,11,0.15); color: #fbbf24; }
+.card-icon.green { background: rgba(16,185,129,0.15); color: #34d399; }
+.card-icon.purple { background: rgba(139,92,246,0.15); color: #a78bfa; }
+
+.card-info { flex: 1; min-width: 0; }
+.card-name { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+.card-tagline { font-size: 12px; color: var(--text-mid); margin-bottom: 8px; }
+.card-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+
+.tag { font-size: 10px; font-family: "SF Mono", "Fira Code", monospace; color: var(--text-dim); background: rgba(30,41,59,0.6); border: 1px solid var(--border); padding: 2px 7px; border-radius: 4px; }
+
+.card-arrow { color: var(--text-dim); font-size: 16px; transition: transform 0.3s; flex-shrink: 0; margin-top: 4px; animation: arrowPulse 2s ease-in-out infinite; }
+
+@keyframes arrowPulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+
+.project-card.active .card-arrow { transform: rotate(90deg); color: var(--accent); animation: none; }
+
+.card-expand-hint { font-size: 11px; color: var(--text-dim); text-align: center; padding: 6px 0 10px; opacity: 0.7; letter-spacing: 1px; }
+.project-card.active .card-expand-hint { display: none; }
+
+.card-detail { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
+.project-card.active .card-detail { max-height: 2000px; }
+
+.detail-inner { padding: 0 18px 18px; border-top: 1px solid var(--border); margin-top: 0; }
+.detail-section { padding-top: 14px; }
+
+.detail-label { font-size: 11px; color: var(--accent); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px; font-weight: 600; }
+.detail-text { font-size: 13px; color: var(--text-mid); line-height: 1.7; }
+
+.feature-list { list-style: none; }
+.feature-list li { font-size: 13px; color: var(--text-mid); padding: 5px 0; padding-left: 18px; position: relative; }
+.feature-list li::before { content: '\25B8'; position: absolute; left: 0; color: var(--accent); }
+
+.gitee-btn {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; padding: 12px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #fff; border: none; border-radius: 10px;
+  font-size: 14px; font-weight: 600; text-decoration: none;
+  margin-top: 14px; transition: opacity 0.2s, transform 0.2s;
+}
+
+.gitee-btn:active { transform: scale(0.97); opacity: 0.9; }
+
+.footer { text-align: center; padding: 30px 0 40px; border-top: 1px solid var(--border); margin-top: 20px; }
+.footer .contact-row { display: flex; justify-content: center; gap: 16px; margin-bottom: 14px; }
+
+.contact-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 8px 18px; border-radius: 20px;
+  background: var(--bg-card); border: 1px solid var(--border);
+  text-decoration: none; font-size: 13px; color: var(--text-mid);
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.contact-btn:active { border-color: var(--accent); color: var(--accent); }
+.footer .copy { font-size: 11px; color: var(--text-dim); }
+
+.project-card { animation: fadeUp 0.4s ease backwards; }
+.project-card:nth-child(1) { animation-delay: 0.05s; }
+.project-card:nth-child(2) { animation-delay: 0.1s; }
+.project-card:nth-child(3) { animation-delay: 0.15s; }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+@media (min-width: 768px) {
+  .container { max-width: 720px; padding: 0 24px; }
+  .header h1 { font-size: 28px; }
+  .header .bio { font-size: 15px; }
+  .card-name { font-size: 16px; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="header">
+    <div class="avatar">V4L2</div>
+    <h1>Linux V4L2 摄像头驱动库</h1>
+    <div class="title">C++11 · V4L2 · Framebuffer · ARM 交叉编译</div>
+    <p class="bio">基于 V4L2 接口的 C++ 摄像头驱动封装库，集成 Framebuffer LCD 显示，从采集到显示一站式处理</p>
+  </div>
+
+  <div class="stats">
+    <div class="stat-item">
+      <div class="num">C++11</div>
+      <div class="label">语言标准</div>
+    </div>
+    <div class="stat-item">
+      <div class="num">V4L2</div>
+      <div class="label">视频接口</div>
+    </div>
+    <div class="stat-item">
+      <div class="num">FB</div>
+      <div class="label">LCD 显示</div>
+    </div>
+    <div class="stat-item">
+      <div class="num">ARM</div>
+      <div class="label">交叉编译</div>
+    </div>
+  </div>
+
+  <div class="overview">
+    <div class="overview-text">
+      基于 <strong>V4L2 (Video for Linux 2)</strong> 接口的 C++ 摄像头驱动封装库，专为嵌入式 Linux 平台设计。自动扫描系统 V4L2 设备，智能匹配分辨率，集成 <strong>Framebuffer LCD 显示</strong>与双缓冲防撕裂。YUV->RGB 转换使用<strong>定点数运算</strong>，适合无 FPU 的 ARM 处理器。支持 ARM 交叉编译，输出静态库 + 示例程序。
+    </div>
+    <div class="highlight-row">
+      <div class="highlight-item">
+        <div class="highlight-num">自动</div>
+        <div class="highlight-label">设备扫描与分辨率匹配<br><span class="highlight-sub">/sys/class/video4linux/</span></div>
+      </div>
+      <div class="highlight-item">
+        <div class="highlight-num">双缓冲</div>
+        <div class="highlight-label">Framebuffer 显示<br><span class="highlight-sub">VSYNC + PAN_DISPLAY</span></div>
+      </div>
+      <div class="highlight-item">
+        <div class="highlight-num">定点数</div>
+        <div class="highlight-label">YUV->RGB 转换<br><span class="highlight-sub">BT.601 移位运算</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">技术栈</div>
+  <div class="tech-grid">
+    <div class="tech-item"><div class="tech-name">C++11</div><div class="tech-ver">语言标准</div></div>
+    <div class="tech-item"><div class="tech-name">V4L2</div><div class="tech-ver">Video for Linux 2</div></div>
+    <div class="tech-item"><div class="tech-name">Framebuffer</div><div class="tech-ver">Linux LCD 显示</div></div>
+    <div class="tech-item"><div class="tech-name">mmap</div><div class="tech-ver">零拷贝缓冲区映射</div></div>
+    <div class="tech-item"><div class="tech-name">pthread</div><div class="tech-ver">POSIX 多线程</div></div>
+    <div class="tech-item"><div class="tech-name">select</div><div class="tech-ver">I/O 多路复用</div></div>
+    <div class="tech-item"><div class="tech-name">CMake</div><div class="tech-ver">3.15+ 构建系统</div></div>
+    <div class="tech-item"><div class="tech-name">ARM GCC</div><div class="tech-ver">gnueabi/gnueabihf</div></div>
+  </div>
+
+  <div class="section-title">模块详情</div>
+
+  <div class="project-card" onclick="toggleCard(this)">
+    <div class="card-header">
+      <div class="card-icon cyan">&#9632;</div>
+      <div class="card-info">
+        <div class="card-name">设备管理与能力查询</div>
+        <div class="card-tagline">自动扫描 · 格式枚举 · 分辨率帧率查询</div>
+        <div class="card-tags">
+          <span class="tag">CameraManager</span>
+          <span class="tag">CameraCapability</span>
+          <span class="tag">VIDIOC_*</span>
+        </div>
+      </div>
+      <span class="card-arrow">&#8250;</span>
+    </div>
+    <div class="card-expand-hint">点击展开详情</div>
+    <div class="card-detail">
+      <div class="detail-inner">
+        <div class="detail-section">
+          <div class="detail-label">项目描述</div>
+          <p class="detail-text">CameraManager 单例类自动扫描 /sys/class/video4linux/ 目录发现所有 V4L2 设备，过滤子设备节点。通过 VIDIOC_QUERYCAP 获取设备驱动名、总线信息，三级嵌套查询（VIDIOC_ENUM_FMT → VIDIOC_ENUM_FRAMESIZES → VIDIOC_ENUM_FRAMEINTERVALS）完整枚举设备支持的格式、分辨率、帧率。</p>
+        </div>
+        <div class="detail-section">
+          <div class="detail-label">核心特性</div>
+          <ul class="feature-list">
+            <li>自动扫描 /sys/class/video4linux/，过滤 v4l-subdev 子设备</li>
+            <li>VIDIOC_QUERYCAP 查询驱动名、总线信息、虚拟设备标记</li>
+            <li>三级嵌套枚举：格式 → 分辨率 → 帧率，支持 DISCRETE/CONTINUOUS/STEPWISE</li>
+            <li>CameraCapability 类管理格式集合（位掩码存储）、分辨率列表、帧率配置</li>
+            <li>supportsFormat() / supportsFrameRate() 查询接口</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="project-card" onclick="toggleCard(this)">
+    <div class="card-header">
+      <div class="card-icon amber">&#9654;</div>
+      <div class="card-info">
+        <div class="card-name">采集与显示引擎</div>
+        <div class="card-tagline">MMAP 零拷贝 · 双缓冲防撕裂 · 智能分辨率匹配</div>
+        <div class="card-tags">
+          <span class="tag">mmap</span>
+          <span class="tag">双缓冲</span>
+          <span class="tag">VSYNC</span>
+          <span class="tag">函数指针</span>
+        </div>
+      </div>
+      <span class="card-arrow">&#8250;</span>
+    </div>
+    <div class="card-expand-hint">点击展开详情</div>
+    <div class="card-detail">
+      <div class="detail-inner">
+        <div class="detail-section">
+          <div class="detail-label">项目描述</div>
+          <p class="detail-text">CameraDriver 核心驱动类，封装 V4L2 摄像头采集与 Framebuffer LCD 显示的完整流程。初始化 LCD 后自动检测屏幕像素格式（RGB565/RGB888/ARGB32），通过函数指针一次性确定绘制函数，避免运行时反复判断。智能分辨率匹配：在摄像头支持的分辨率中自动寻找能放入屏幕内的最大分辨率。</p>
+        </div>
+        <div class="detail-section">
+          <div class="detail-label">核心特性</div>
+          <ul class="feature-list">
+            <li>MMAP 零拷贝缓冲区映射，VIDIOC_REQBUFS + VIDIOC_QUERYBUF + mmap</li>
+            <li>Framebuffer 双缓冲：FBIOPAN_DISPLAY 切换缓冲区 + FBIO_WAITFORVSYNC 等待垂直同步，防撕裂</li>
+            <li>智能分辨率匹配：初始化 LCD 后自动寻找屏幕内最大可用分辨率</li>
+            <li>自动检测 LCD 像素格式，函数指针一次性绑定绘制函数</li>
+            <li>边界检查自动修正偏移量，支持自定义显示位置（画中画）</li>
+            <li>首屏数据备份，程序退出时自动恢复 LCD 原始画面</li>
+            <li>std::recursive_mutex 保护资源，支持多线程环境</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="project-card" onclick="toggleCard(this)">
+    <div class="card-header">
+      <div class="card-icon green">&#9881;</div>
+      <div class="card-info">
+        <div class="card-name">YUV->RGB 定点数转换</div>
+        <div class="card-tagline">BT.601 标准 · 移位运算 · 无浮点 · 多格式输出</div>
+        <div class="card-tags">
+          <span class="tag">YUYV</span>
+          <span class="tag">RGB565</span>
+          <span class="tag">RGB888</span>
+          <span class="tag">ARGB32</span>
+        </div>
+      </div>
+      <span class="card-arrow">&#8250;</span>
+    </div>
+    <div class="card-expand-hint">点击展开详情</div>
+    <div class="card-detail">
+      <div class="detail-inner">
+        <div class="detail-section">
+          <div class="detail-label">项目描述</div>
+          <p class="detail-text">三套 YUYV 到 RGB 格式转换函数，均使用 BT.601 标准定点数运算。右移 8 位代替除法，完全无浮点运算，适合无 FPU 的嵌入式 ARM 处理器。YUYV 格式每 4 字节包含 2 个像素（Y0 U Y1 V），转换时每次处理 2 个像素共享 U/V 分量。</p>
+        </div>
+        <div class="detail-section">
+          <div class="detail-label">核心特性</div>
+          <ul class="feature-list">
+            <li>YUYV → RGB565：16 位色，适合低内存嵌入式屏</li>
+            <li>YUYV → RGB888：24 位真彩色</li>
+            <li>YUYV → ARGB32：32 位带透明通道</li>
+            <li>BT.601 定点数公式：移位运算代替浮点，ARM 无 FPU 也能高效运行</li>
+            <li>YUYV 双像素共享 U/V，减少一半色度计算量</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="contact-row">
+      <a class="contact-btn" href="https://gitee.com/fszzh/camera-driver" target="_blank" title="查看源码">查看源码</a>
+    </div>
+    <p class="copy">扫描二维码查看项目源码</p>
+  </div>
+
+</div>
+
+<script>
+function toggleCard(card) {
+  const wasActive = card.classList.contains('active');
+  document.querySelectorAll('.project-card').forEach(c => c.classList.remove('active'));
+  if (!wasActive) { card.classList.add('active'); }
+}
+</script>
+
+</body>
+</html>
