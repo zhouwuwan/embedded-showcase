@@ -262,14 +262,14 @@ body::before {
       <div class="label">LCD 显示</div>
     </div>
     <div class="stat-item">
-      <div class="num">ARM</div>
-      <div class="label">交叉编译</div>
+      <div class="num">6+</div>
+      <div class="label">Linux 核心 API</div>
     </div>
   </div>
 
   <div class="overview">
     <div class="overview-text">
-      基于 <strong>V4L2 (Video for Linux 2)</strong> 接口的 C++ 摄像头驱动封装库，专为嵌入式 Linux 平台设计。自动扫描系统 V4L2 设备，智能匹配分辨率，集成 <strong>Framebuffer LCD 显示</strong>与双缓冲防撕裂。YUV->RGB 转换使用<strong>定点数运算</strong>，适合无 FPU 的 ARM 处理器。支持 ARM 交叉编译，输出静态库 + 示例程序。
+      基于 <strong>V4L2 (Video for Linux 2)</strong> 接口的 C++ 摄像头驱动封装库，专为嵌入式 Linux 平台设计。自动扫描系统 V4L2 设备，智能匹配分辨率，集成 <strong>Framebuffer LCD 显示</strong>与双缓冲防撕裂。YUV->RGB 转换使用<strong>定点数运算</strong>，适合无 FPU 的 ARM 处理器。涵盖 <strong>信号处理、POSIX 多线程、I/O 多路复用、mmap 零拷贝、ioctl 设备控制、互斥锁</strong>等 Linux 核心编程接口。支持 ARM 交叉编译，输出静态库 + 示例程序。
     </div>
     <div class="highlight-row">
       <div class="highlight-item">
@@ -295,6 +295,9 @@ body::before {
     <div class="tech-item"><div class="tech-name">mmap</div><div class="tech-ver">零拷贝缓冲区映射</div></div>
     <div class="tech-item"><div class="tech-name">pthread</div><div class="tech-ver">POSIX 多线程</div></div>
     <div class="tech-item"><div class="tech-name">select</div><div class="tech-ver">I/O 多路复用</div></div>
+    <div class="tech-item"><div class="tech-name">signal</div><div class="tech-ver">SIGINT 信号处理</div></div>
+    <div class="tech-item"><div class="tech-name">ioctl</div><div class="tech-ver">设备控制接口</div></div>
+    <div class="tech-item"><div class="tech-name">recursive_mutex</div><div class="tech-ver">递归互斥锁</div></div>
     <div class="tech-item"><div class="tech-name">CMake</div><div class="tech-ver">3.15+ 构建系统</div></div>
     <div class="tech-item"><div class="tech-name">ARM GCC</div><div class="tech-ver">gnueabi/gnueabihf</div></div>
   </div>
