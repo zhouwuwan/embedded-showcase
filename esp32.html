@@ -551,13 +551,13 @@ body::before {
 
     <div class="test-card">
       <div class="test-img-wrap">
-        <img src="images/esp32_video_stream.jpg" alt="视频流播放" onerror="this.style.display='none';this.parentNode.querySelector('.test-img-fallback').style.display='flex'">
+        <img src="images/esp32_video_data.png" alt="视频流传输数据" onerror="this.style.display='none';this.parentNode.querySelector('.test-img-fallback').style.display='flex'">
         <div class="test-img-fallback" style="display:none">
-          <span>截图待放入<br><small>images/esp32_video_stream.jpg</small></span>
+          <span>截图待放入<br><small>images/esp32_video_data.png</small></span>
         </div>
       </div>
       <div class="test-info">
-        <div class="test-title">MJPEG 视频流实时显示</div>
+        <div class="test-title">MJPEG 视频流传输数据</div>
         <div class="test-desc">TCP 接收 MJPEG 帧 -> JPEG 硬件解码 -> RGB565 双缓冲 -> SPI LCD DMA 显示</div>
       </div>
     </div>
@@ -625,10 +625,10 @@ body::before {
         </div>
         <div class="detail-section">
           <div class="detail-label">演示视频</div>
-          <div class="video-placeholder">
-            <div class="play-btn"></div>
-            <div class="label">视频待录制 · 视频流播放演示</div>
-          </div>
+          <video controls style="width:100%;border-radius:10px;background:#000" poster="images/esp32_video_data.png">
+            <source src="images/esp32_video_stream.mp4" type="video/mp4">
+            浏览器不支持视频播放
+          </video>
         </div>
         <a class="gitee-btn" href="https://gitee.com/fszzh/esp32-s3-video-terminal" target="_blank">
           查看源码
