@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>RK3506 多协议 Modbus 工业数据采集网关</title>
+<style>
+:root {
+  --bg: #0a0e1a;
+  --bg-card: #131a2b;
+  --bg-card-hover: #1a2340;
+  --border: #1e293b;
+  --border-active: #06b6d4;
+  --text: #f1f5f9;
+  --text-dim: #64748b;
+  --text-mid: #94a3b8;
+  --accent: #06b6d4;
+  --accent-2: #3b82f6;
+  --warn: #f59e0b;
+  --success: #10b981;
+  --radius: 14px;
+  --shadow: 0 4px 24px rgba(0,0,0,0.4);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 20% 50%, rgba(6,182,212,0.06) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(59,130,246,0.05) 0%, transparent 50%),
+    linear-gradient(rgba(30,41,59,0.3) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(30,41,59,0.3) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.container {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 0 16px;
+  position: relative;
+  z-index: 1;
+}
+
+.header {
+  padding: 40px 0 28px;
+  text-align: center;
+}
+
+.header .avatar {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 16px;
+  font-size: 20px; font-weight: 700; color: #fff;
+  box-shadow: 0 0 24px rgba(6,182,212,0.3);
+}
+
+.header h1 {
+  font-size: 22px; font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.header .title {
+  display: inline-block;
+  font-size: 13px;
+  color: var(--accent);
+  background: rgba(6,182,212,0.1);
+  border: 1px solid rgba(6,182,212,0.3);
+  padding: 3px 12px;
+  border-radius: 20px;
+  margin-bottom: 10px;
+}
+
+.header .bio {
+  font-size: 14px;
+  color: var(--text-mid);
+  max-width: 380px;
+  margin: 0 auto;
+}
+
+.stats {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  padding: 16px 0;
+  margin-bottom: 8px;
+}
+
+.stat-item { text-align: center; }
+
+.stat-item .num {
+  font-size: 24px; font-weight: 700;
+  color: var(--accent);
+  font-family: "SF Mono", "Fira Code", monospace;
+}
+
+.stat-item .label {
+  font-size: 11px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.section-title {
+  font-size: 13px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin: 24px 0 14px;
+  display: flex; align-items: center; gap: 8px;
+}
+
+.section-title::before {
+  content: '';
+  width: 3px; height: 14px;
+  background: var(--accent);
+  border-radius: 2px;
+}
+
+.overview {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  margin-bottom: 20px;
+}
+
+.overview-text {
+  font-size: 13px;
+  color: var(--text-mid);
+  line-height: 1.8;
+}
+
+.overview-text strong { color: var(--text); }
+
+.highlight-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 16px 0 6px;
+}
+
+.highlight-item {
+  flex: 1;
+  text-align: center;
+  background: rgba(6,182,212,0.06);
+  border: 1px solid rgba(6,182,212,0.15);
+  border-radius: 10px;
+  padding: 12px 6px;
+}
+
+.highlight-num {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--accent);
+  font-family: "SF Mono", "Fira Code", monospace;
+  margin-bottom: 4px;
+}
+
+.highlight-label {
+  font-size: 10px;
+  color: var(--text-dim);
+  line-height: 1.4;
+}
+
+.highlight-sub { color: var(--text-dim); opacity: 0.7; }
+
+.tech-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.tech-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  text-align: center;
+}
+
+.tech-item .tech-name { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+.tech-item .tech-ver { font-size: 10px; color: var(--text-dim); font-family: "SF Mono", monospace; }
+
+.test-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.test-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.test-img-wrap {
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: #000;
+  overflow: hidden;
+  position: relative;
+}
+
+.test-img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.test-img-fallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-dim);
+  font-size: 13px;
+  text-align: center;
+  background: rgba(6,182,212,0.04);
+  border: 1px dashed var(--border);
+}
+
+.test-img-fallback small { color: var(--accent); }
+
+.test-info { padding: 12px 14px; }
+.test-title { font-size: 13px; font-weight: 600; margin-bottom: 3px; }
+.test-desc { font-size: 11px; color: var(--text-dim); line-height: 1.5; }
+
+.project-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 14px;
+  overflow: hidden;
+  transition: border-color 0.3s, transform 0.2s;
+  cursor: pointer;
+}
+
+.project-card:active { transform: scale(0.98); }
+
+.project-card.active {
+  border-color: var(--border-active);
+  box-shadow: 0 0 0 1px rgba(6,182,212,0.2), var(--shadow);
+}
+
+.card-header {
+  padding: 18px 18px 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.card-icon {
+  width: 44px; height: 44px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.card-icon.blue { background: rgba(59,130,246,0.15); color: #60a5fa; }
+.card-icon.cyan { background: rgba(6,182,212,0.15); color: #22d3ee; }
+.card-icon.amber { background: rgba(245,158,11,0.15); color: #fbbf24; }
+.card-icon.green { background: rgba(16,185,129,0.15); color: #34d399; }
+.card-icon.purple { background: rgba(139,92,246,0.15); color: #a78bfa; }
+
+.card-info { flex: 1; min-width: 0; }
+.card-name { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+.card-tagline { font-size: 12px; color: var(--text-mid); margin-bottom: 8px; }
+.card-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+
+.tag {
+  font-size: 10px;
+  font-family: "SF Mono", "Fira Code", monospace;
+  color: var(--text-dim);
+  background: rgba(30,41,59,0.6);
+  border: 1px solid var(--border);
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+.card-arrow {
+  color: var(--text-dim);
+  font-size: 16px;
+  transition: transform 0.3s;
+  flex-shrink: 0;
+  margin-top: 4px;
+  animation: arrowPulse 2s ease-in-out infinite;
+}
+
+@keyframes arrowPulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+.project-card.active .card-arrow { transform: rotate(90deg); color: var(--accent); animation: none; }
+
+.card-expand-hint {
+  font-size: 11px;
+  color: var(--text-dim);
+  text-align: center;
+  padding: 6px 0 10px;
+  opacity: 0.7;
+  letter-spacing: 1px;
+}
+
+.project-card.active .card-expand-hint { display: none; }
+
+.card-detail {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease;
+}
+
+.project-card.active .card-detail { max-height: 2000px; }
+
+.detail-inner {
+  padding: 0 18px 18px;
+  border-top: 1px solid var(--border);
+  margin-top: 0;
+}
+
+.detail-section { padding-top: 14px; }
+
+.detail-label {
+  font-size: 11px;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.detail-text { font-size: 13px; color: var(--text-mid); line-height: 1.7; }
+
+.feature-list { list-style: none; }
+
+.feature-list li {
+  font-size: 13px;
+  color: var(--text-mid);
+  padding: 5px 0;
+  padding-left: 18px;
+  position: relative;
+}
+
+.feature-list li::before {
+  content: '\25B8';
+  position: absolute;
+  left: 0;
+  color: var(--accent);
+}
+
+.gitee-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  margin-top: 14px;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.gitee-btn:active { transform: scale(0.97); opacity: 0.9; }
+
+.footer {
+  text-align: center;
+  padding: 30px 0 40px;
+  border-top: 1px solid var(--border);
+  margin-top: 20px;
+}
+
+.footer .contact-row {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.contact-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 18px;
+  border-radius: 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  text-decoration: none;
+  font-size: 13px;
+  color: var(--text-mid);
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.contact-btn:active { border-color: var(--accent); color: var(--accent); }
+
+.footer .copy { font-size: 11px; color: var(--text-dim); }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.project-card { animation: fadeUp 0.4s ease backwards; }
+.project-card:nth-child(1) { animation-delay: 0.05s; }
+.project-card:nth-child(2) { animation-delay: 0.1s; }
+.project-card:nth-child(3) { animation-delay: 0.15s; }
+.project-card:nth-child(4) { animation-delay: 0.2s; }
+.project-card:nth-child(5) { animation-delay: 0.25s; }
+
+@media (min-width: 768px) {
+  .container { max-width: 720px; padding: 0 24px; }
+  .header h1 { font-size: 28px; }
+  .header .bio { font-size: 15px; }
+  .card-name { font-size: 16px; }
+}
+
+.arch-diagram {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  margin-bottom: 20px;
+  overflow-x: auto;
+}
+
+.arch-diagram pre {
+  font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--text-mid);
+  white-space: pre;
+  margin: 0;
+}
+
+.arch-diagram .hl-accent { color: var(--accent); font-weight: 600; }
+.arch-diagram .hl-warn { color: var(--warn); font-weight: 600; }
+.arch-diagram .hl-green { color: var(--success); font-weight: 600; }
+.arch-diagram .hl-blue { color: #60a5fa; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="header">
+    <div class="avatar">MB</div>
+    <h1>RK3506 多协议 Modbus 工业数据采集网关</h1>
+    <div class="title">RK3506 · RT-Thread · libmodbus · WebNet</div>
+    <p class="bio">基于 RK3506 的多协议工业网关，以太网/RS485/WiFi 三介质并发采集，WebNet 实时仪表盘监控</p>
+  </div>
+
+  <div class="stats">
+    <div class="stat-item">
+      <div class="num">3</div>
+      <div class="label">物理介质</div>
+    </div>
+    <div class="stat-item">
+      <div class="num">3</div>
+      <div class="label">从站节点</div>
+    </div>
+    <div class="stat-item">
+      <div class="num">5</div>
+      <div class="label">Modbus FC</div>
+    </div>
+    <div class="stat-item">
+      <div class="num">2</div>
+      <div class="label">MCU 协作</div>
+    </div>
+  </div>
+
+  <div class="overview">
+    <div class="overview-text">
+      基于 RK3506（Cortex-A7 双核）的多协议 Modbus 工业数据采集网关。主机侧通过<strong>以太网（Modbus TCP）、RS485（Modbus RTU）、WiFi（TCP）</strong>三种物理介质并发采集 3 个从站数据，<strong>轮询调度引擎</strong>统一管理多从站生命周期，<strong>心跳保活</strong>维持 TCP 长连接，<strong>WebNet CGI</strong> 提供实时 JSON API 与仪表盘界面。从机侧 STM32F407 同时运行 RTU 从站与 TCP 从站，<strong>共享数据区 + 互斥锁</strong>实现双通道数据一致性。
+    </div>
+    <div class="highlight-row">
+      <div class="highlight-item">
+        <div class="highlight-num">3介质</div>
+        <div class="highlight-label">并发采集<br><span class="highlight-sub">TCP + RTU + WiFi</span></div>
+      </div>
+      <div class="highlight-item">
+        <div class="highlight-num">30s</div>
+        <div class="highlight-label">心跳保活<br><span class="highlight-sub">TCP 长连接</span></div>
+      </div>
+      <div class="highlight-item">
+        <div class="highlight-num">2s</div>
+        <div class="highlight-label">仪表盘刷新<br><span class="highlight-sub">WebNet CGI</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">系统架构</div>
+  <div class="arch-diagram">
+<pre>
+<span class="hl-accent">┌─────────────────────────────────────────────────────────┐</span>
+<span class="hl-accent">│</span>                    <span class="hl-accent">RK3506 主机网关</span>                       <span class="hl-accent">│</span>
+<span class="hl-accent">│</span>  ┌──────────┐  ┌──────────┐  ┌──────────┐             <span class="hl-accent">│</span>
+<span class="hl-accent">│</span>  │<span class="hl-blue"> WebNet   </span>│  │<span class="hl-green"> 轮询调度  </span>│  │<span class="hl-warn"> Shell    </span>│             <span class="hl-accent">│</span>
+<span class="hl-accent">│</span>  │<span class="hl-blue"> CGI API  </span>│  │<span class="hl-green"> Scheduler</span>│  │<span class="hl-warn"> 交互命令 </span>│             <span class="hl-accent">│</span>
+<span class="hl-accent">│</span>  └────┬─────┘  └────┬─────┘  └────┬─────┘             <span class="hl-accent">│</span>
+<span class="hl-accent">│</span>       │             │             │                    <span class="hl-accent">│</span>
+<span class="hl-accent">│</span>       └─────────────┼─────────────┘                    <span class="hl-accent">│</span>
+<span class="hl-accent">│</span>                     │                                  <span class="hl-accent">│</span>
+<span class="hl-accent">│</span>            <span class="hl-green">共用数据层 (modbus_data)</span>                <span class="hl-accent">│</span>
+<span class="hl-accent">│</span>                     │                                  <span class="hl-accent">│</span>
+<span class="hl-accent">│</span>       ┌─────────────┼─────────────┐                    <span class="hl-accent">│</span>
+<span class="hl-accent">│</span>       │             │             │                    <span class="hl-accent">│</span>
+<span class="hl-accent">│</span>  <span class="hl-blue">Modbus TCP</span>  <span class="hl-warn">Modbus RTU</span>  <span class="hl-green">Modbus TCP</span>           <span class="hl-accent">│</span>
+<span class="hl-accent">│</span>  <span class="hl-blue">(以太网)  </span>  <span class="hl-warn">(RS485)   </span>  <span class="hl-green">(WiFi)    </span>           <span class="hl-accent">│</span>
+<span class="hl-accent">└───────┼─────────────┼─────────────┼────────────────────┘</span>
+        │             │             │
+   <span class="hl-blue">Ethernet</span>      <span class="hl-warn">RS485</span>       <span class="hl-green">WiFi</span>
+        │             │             │
+<span class="hl-blue">┌───────┴──────┐  <span class="hl-warn">┌─┴──────────┐</span>  <span class="hl-green">┌┴─────────────┐</span>
+<span class="hl-blue">│ STM32F407   │</span>  <span class="hl-warn">│ RTU 从站1  │</span>  <span class="hl-green">│ TCP 从站3  │</span>
+<span class="hl-blue">│ TCP 从站12  │</span>  <span class="hl-warn">│ (传感器)   │</span>  <span class="hl-green">│ (ESP32-S3) │</span>
+<span class="hl-blue">│ RTU 从站1   │</span>  <span class="hl-warn">└────────────┘</span>  <span class="hl-green">└────────────┘</span>
+<span class="hl-blue">└─────────────┘</span>
+</pre>
+  </div>
+
+  <div class="section-title">技术栈</div>
+  <div class="tech-grid">
+    <div class="tech-item"><div class="tech-name">RK3506</div><div class="tech-ver">Cortex-A7 双核</div></div>
+    <div class="tech-item"><div class="tech-name">RT-Thread</div><div class="tech-ver">v5.x</div></div>
+    <div class="tech-item"><div class="tech-name">libmodbus</div><div class="tech-ver">Modbus TCP/RTU</div></div>
+    <div class="tech-item"><div class="tech-name">WebNet</div><div class="tech-ver">CGI + 静态页面</div></div>
+    <div class="tech-item"><div class="tech-name">STM32F407</div><div class="tech-ver">Cortex-M4 从站</div></div>
+    <div class="tech-item"><div class="tech-name">qmodbus</div><div class="tech-ver">RT-Thread 从站包</div></div>
+    <div class="tech-item"><div class="tech-name">LwIP</div><div class="tech-ver">双网卡 TCP/IP</div></div>
+    <div class="tech-item"><div class="tech-name">RS485</div><div class="tech-ver">SP3485 UART5</div></div>
+    <div class="tech-item"><div class="tech-name">NAND Flash</div><div class="tech-ver">WebNet 持久化</div></div>
+    <div class="tech-item"><div class="tech-name">cJSON</div><div class="tech-ver">JSON API 响应</div></div>
+  </div>
+
+  <div class="section-title">实测效果</div>
+  <div class="test-grid">
+
+    <div class="test-card">
+      <div class="test-img-wrap" style="aspect-ratio:auto;background:#000">
+        <video controls style="width:100%;border-radius:0;display:block" poster="">
+          <source src="images/modbus_dashboard.mp4" type="video/mp4">
+          浏览器不支持视频播放
+        </video>
+      </div>
+      <div class="test-info">
+        <div class="test-title">WebNet 仪表盘实时测试</div>
+        <div class="test-desc">Linear Aesthetic 风格仪表盘，2 秒自动刷新，线圈点击翻转（FC05），寄存器点击编辑写入（FC06），XMLHttpRequest 局部更新</div>
+      </div>
+    </div>
+
+    <div class="test-card">
+      <div class="test-img-wrap">
+        <img src="images/407测试显示.png" alt="407 mb_slave_data 数据显示" onerror="this.style.display='none';this.parentNode.querySelector('.test-img-fallback').style.display='flex'">
+        <div class="test-img-fallback" style="display:none">
+          <span>截图待放入<br><small>images/407测试显示.png</small></span>
+        </div>
+      </div>
+      <div class="test-info">
+        <div class="test-title">STM32F407 双从站数据验证</div>
+        <div class="test-desc">mb_slave_data 命令显示共享数据区，RTU 从站1 + TCP 从站12 并发运行，互斥锁保证双通道数据一致性</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="section-title">模块详情</div>
+
+  <div class="project-card" onclick="toggleCard(this)">
+    <div class="card-header">
+      <div class="card-icon cyan">&#9881;</div>
+      <div class="card-info">
+        <div class="card-name">轮询调度引擎</div>
+        <div class="card-tagline">多从站生命周期 · 心跳保活 · 消息队列驱动</div>
+        <div class="card-tags">
+          <span class="tag">Scheduler</span>
+          <span class="tag">Heartbeat</span>
+          <span class="tag">MessageQueue</span>
+          <span class="tag">RT-Thread</span>
+        </div>
+      </div>
+      <span class="card-arrow">&#8250;</span>
+    </div>
+    <div class="card-expand-hint">点击展开详情</div>
+    <div class="card-detail">
+      <div class="detail-inner">
+        <div class="detail-section">
+          <div class="detail-label">项目描述</div>
+          <p class="detail-text">统一管理多从站轮询调度的核心引擎。每个从站独立维护 libmodbus context、心跳线程和工作线程，通过消息队列接收控制指令（启动/停止/退出）。TCP 从站采用长连接 + 心跳保活策略，每 30 秒发送 FC03 请求维持连接活跃。轮询间隔可配置，支持运行时动态启停单个从站。</p>
+        </div>
+        <div class="detail-section">
+          <div class="detail-label">核心特性</div>
+          <ul class="feature-list">
+            <li>mb_quick_start 一键初始化：3 行代码配置 3 个从站（TCP/RTU/WiFi）</li>
+            <li>分层设计：添加从站无需修改定时器代码，slave_info 配置表驱动</li>
+            <li>TCP 长连接 + 心跳保活：30 秒一次 FC03 读 1 个寄存器，避免每次轮询重建连接</li>
+            <li>消息队列驱动：poll_start/poll_stop/poll_exit 通过 rt_mq_send 异步控制</li>
+            <li>valid_mask 机制：连续地址存储，无效地址填 0 不报错，从站侧不操作 GPIO 便于广播写</li>
+            <li>主从共用数据块结构：modbus_bits_block_t / modbus_regs_block_t 主从站都可复用</li>
+            <li>API 层解耦：WebNet 等消费者通过 poll_get_slave_info() 读取，不直接 extern 内部数据</li>
+            <li>poll_stop 安全退出：先删消息队列（使 rt_mq_recv 返回错误），等线程退出，再删线程</li>
+          </ul>
+        </div>
+        <div class="detail-section">
+          <div class="detail-label">关键技术点</div>
+          <ul class="feature-list">
+            <li>RT-Thread v5.x rt_mq_recv 返回值变更：成功返回消息字节数而非 RT_EOK，必须用 err &lt; 0 判断</li>
+            <li>双网卡路由：e0(192.168.0.100) + e1(192.168.3.100)，modbus-tcp.c 源 IP 绑定解决跨网段路由</li>
+            <li>线程栈：心跳线程 4096 字节，工作线程 8192 字节（lwIP 调用链深度大）</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="project-card" onclick="toggleCard(this)">
+    <div class="card-header">
+      <div class="card-icon blue">&#127760;</div>
+      <div class="card-info">
+        <div class="card-name">WebNet CGI 接口与仪表盘</div>
+        <div class="card-tagline">JSON API · 实时仪表盘 · FC05/FC06 双写 · FTP 部署</div>
+        <div class="card-tags">
+          <span class="tag">WebNet</span>
+          <span class="tag">CGI</span>
+          <span class="tag">cJSON</span>
+          <span class="tag">HTML</span>
+        </div>
+      </div>
+      <span class="card-arrow">&#8250;</span>
+    </div>
+    <div class="card-expand-hint">点击展开详情</div>
+    <div class="card-detail">
+      <div class="detail-inner">
+        <div class="detail-section">
+          <div class="detail-label">项目描述</div>
+          <p class="detail-text">基于 RT-Thread WebNet 组件的 HTTP 接口层。CGI 模式注册 3 个端点：/cgi-bin/slaves（从站列表）、/cgi-bin/slave（单站详情）、/cgi-bin/write（写操作）。仪表盘 HTML 独立文件通过 FTP 上传至 /data/webnet/index.html（NAND Flash 持久化），编辑后 FTP 上传即可更新，无需重编固件。</p>
+        </div>
+        <div class="detail-section">
+          <div class="detail-label">核心特性</div>
+          <ul class="feature-list">
+            <li>3 个 CGI 端点：slaves（从站列表 JSON）、slave（单站详情 JSON）、write（写操作）</li>
+            <li>write 端点支持 fc 参数：fc=5 写线圈（FC05）、fc=6 写寄存器（FC06），默认 fc=6</li>
+            <li>仪表盘 Linear Aesthetic 风格：2 秒 XMLHttpRequest 自动刷新，线圈点击翻转，寄存器点击编辑</li>
+            <li>输入保护：寄存器值范围 0-65535，线圈仅 0/1 翻转</li>
+            <li>WebNet 根目录 /data/webnet（NAND Flash），重启不丢失，优于 /tmp/webnet（RAM）</li>
+            <li>HTML 独立部署：FTP 上传 dashboard.html 即可更新界面，不嵌入固件 C 字符串</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="project-card" onclick="toggleCard(this)">
+    <div class="card-header">
+      <div class="card-icon amber">&#9889;</div>
+      <div class="card-info">
+        <div class="card-name">STM32F407 双从站系统</div>
+        <div class="card-tagline">RTU+TCP 双通道 · 共享数据区 · qmodbus SOCK 后端</div>
+        <div class="card-tags">
+          <span class="tag">STM32F407</span>
+          <span class="tag">qmodbus</span>
+          <span class="tag">RTU</span>
+          <span class="tag">TCP</span>
+        </div>
+      </div>
+      <span class="card-arrow">&#8250;</span>
+    </div>
+    <div class="card-expand-hint">点击展开详情</div>
+    <div class="card-detail">
+      <div class="detail-inner">
+        <div class="detail-section">
+          <div class="detail-label">项目描述</div>
+          <p class="detail-text">STM32F407 同时运行 Modbus RTU 从站（站号 1，RS485 USART2）和 Modbus TCP 从站（站号 12，端口 502 SOCK 后端）。两个从站共享同一数据区，任一通道写入的数据另一通道也能读到，通过互斥锁保证并发安全。INIT_APP_EXPORT 自启动，上电即运行。</p>
+        </div>
+        <div class="detail-section">
+          <div class="detail-label">核心特性</div>
+          <ul class="feature-list">
+            <li>RTU 从站：USART2 RS485（PD5/TX, PA3/RX），SP3485 方向控制 PG8，站号 1</li>
+            <li>TCP 从站：SOCK 后端，端口 502 侦听，accept 连接后创建从机实例，站号 12</li>
+            <li>共享数据区：线圈 32 位 + 寄存器 32 个 + valid_mask，rt_mutex 保护</li>
+            <li>qmodbus 回调覆盖：mb_cb_table_t 覆盖弱函数，读写操作直接访问共享数据区</li>
+            <li>从站侧不操作 GPIO：valid_mask 标记无效地址填 0 不报错，便于主机广播写</li>
+            <li>静态 IP 192.168.3.30，禁用 DHCP，直连网段无需网关</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="project-card" onclick="toggleCard(this)">
+    <div class="card-header">
+      <div class="card-icon green">&#128187;</div>
+      <div class="card-info">
+        <div class="card-name">交互式命令行工具</div>
+        <div class="card-tagline">MSH 命令 · mb_connect/read/write · mb_quick_start</div>
+        <div class="card-tags">
+          <span class="tag">MSH</span>
+          <span class="tag">Shell</span>
+          <span class="tag">Debug</span>
+        </div>
+      </div>
+      <span class="card-arrow">&#8250;</span>
+    </div>
+    <div class="card-expand-hint">点击展开详情</div>
+    <div class="card-detail">
+      <div class="detail-inner">
+        <div class="detail-section">
+          <div class="detail-label">项目描述</div>
+          <p class="detail-text">完整的 MSH 交互式命令行工具集，覆盖连接、读写、轮询调度全流程。支持 TCP/RTU 两种后端，开发调试阶段可逐步操作，生产环境可一键启动。</p>
+        </div>
+        <div class="detail-section">
+          <div class="detail-label">命令列表</div>
+          <ul class="feature-list">
+            <li>mb_connect &lt;ip&gt; &lt;port&gt; [rtu|tcp] — 建立从站连接</li>
+            <li>mb_read &lt;addr&gt; &lt;count&gt; [bits|regs] — 读取线圈/寄存器</li>
+            <li>mb_write_reg &lt;addr&gt; &lt;value&gt; — 写单个寄存器（FC06）</li>
+            <li>mb_write_bit &lt;addr&gt; &lt;value&gt; — 写单个线圈（FC05）</li>
+            <li>mb_quick_start — 一键初始化 3 个从站并启动轮询</li>
+            <li>poll_start / poll_stop / poll_status — 轮询调度控制</li>
+            <li>mb_retry 宏：自动重连 + 重试，网络抖动容错</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p class="copy">RK3506 多协议 Modbus 工业数据采集网关</p>
+  </div>
+
+</div>
+
+<script>
+function toggleCard(card) {
+  const wasActive = card.classList.contains('active');
+  document.querySelectorAll('.project-card').forEach(c => c.classList.remove('active'));
+  if (!wasActive) {
+    card.classList.add('active');
+  }
+}
+</script>
+
+</body>
+</html>
