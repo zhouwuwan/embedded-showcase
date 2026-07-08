@@ -750,6 +750,27 @@ body::before {
     </div>
   </div>
 
+  <div class="section-title">项目展望</div>
+  <div class="overview">
+    <div class="overview-text">
+      本项目作为工业通信网关的基座平台持续演进，架构设计上<strong>协议层与传输层解耦</strong>，新增协议无需改动调度引擎与数据层。当前正在实现 <strong>CANopen 协议栈</strong>（对象字典 + SDO/PDO 通信 + NMT 网络管理），接入 CAN 总线设备后网关将覆盖 Modbus + CANopen 双协议体系。未来可进一步拓展至 <strong>EtherCAT 实时以太网</strong>，利用 RK3506 双核 A7 的算力实现分布式时钟同步与周期性过程数据交换，构建从现场层到控制层的全栈工业通信能力。
+    </div>
+    <div class="highlight-row">
+      <div class="highlight-item">
+        <div class="highlight-num">Modbus</div>
+        <div class="highlight-label">已实现<br><span class="highlight-sub">TCP + RTU 双协议</span></div>
+      </div>
+      <div class="highlight-item">
+        <div class="highlight-num">CANopen</div>
+        <div class="highlight-label">开发中<br><span class="highlight-sub">SDO/PDO + NMT</span></div>
+      </div>
+      <div class="highlight-item">
+        <div class="highlight-num">EtherCAT</div>
+        <div class="highlight-label">规划中<br><span class="highlight-sub">实时以太网</span></div>
+      </div>
+    </div>
+  </div>
+
   <div class="footer">
     <p class="copy">RK3506 多协议 Modbus 工业数据采集网关</p>
   </div>
