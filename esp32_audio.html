@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>ESP32-S3 多功能音频终端</title>
+<style>
+:root {
+  --bg: #0a0e1a;
+  --bg-card: #131a2b;
+  --bg-card-hover: #1a2340;
+  --border: #1e293b;
+  --border-active: #06b6d4;
+  --text: #f1f5f9;
+  --text-dim: #64748b;
+  --text-mid: #94a3b8;
+  --accent: #06b6d4;
+  --accent-2: #3b82f6;
+  --warn: #f59e0b;
+  --success: #10b981;
+  --radius: 14px;
+  --shadow: 0 4px 24px rgba(0,0,0,0.4);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 20% 50%, rgba(6,182,212,0.06) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(59,130,246,0.05) 0%, transparent 50%),
+    linear-gradient(rgba(30,41,59,0.3) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(30,41,59,0.3) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.container {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 0 16px;
+  position: relative;
+  z-index: 1;
+}
+
+.header {
+  padding: 40px 0 28px;
+  text-align: center;
+}
+
+.header .avatar {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 16px;
+  font-size: 22px; font-weight: 700; color: #fff;
+  box-shadow: 0 0 24px rgba(6,182,212,0.3);
+}
+
+.header h1 {
+  font-size: 22px; font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.header .title {
+  display: inline-block;
+  font-size: 13px;
+  color: var(--accent);
+  background: rgba(6,182,212,0.1);
+  border: 1px solid rgba(6,182,212,0.3);
+  padding: 3px 12px;
+  border-radius: 20px;
+  margin-bottom: 10px;
+}
+
+.header .bio {
+  font-size: 14px;
+  color: var(--text-mid);
+  max-width: 380px;
+  margin: 0 auto;
+}
+
+.stats {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  padding: 16px 0;
+  margin-bottom: 8px;
+}
+
+.stat-item { text-align: center; }
+
+.stat-item .num {
+  font-size: 24px; font-weight: 700;
+  color: var(--accent);
+  font-family: "SF Mono", "Fira Code", monospace;
+}
+
+.stat-item .label {
+  font-size: 11px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.section-title {
+  font-size: 13px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin: 24px 0 14px;
+  display: flex; align-items: center; gap: 8px;
+}
+
+.section-title::before {
+  content: '';
+  width: 3px; height: 14px;
+  background: var(--accent);
+  border-radius: 2px;
+}
+
+.overview {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  margin-bottom: 20px;
+}
+
+.overview-text {
+  font-size: 13px;
+  color: var(--text-mid);
+  line-height: 1.8;
+}
+
+.overview-text strong { color: var(--text); }
+
+.highlight-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 16px 0 6px;
+}
+
+.highlight-item {
+  flex: 1;
+  text-align: center;
+  background: rgba(6,182,212,0.06);
+  border: 1px solid rgba(6,182,212,0.15);
+  border-radius: 10px;
+  padding: 12px 6px;
+}
+
+.highlight-num {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--accent);
+  font-family: "SF Mono", "Fira Code", monospace;
+  margin-bottom: 4px;
+}
+
+.highlight-label {
+  font-size: 10px;
+  color: var(--text-dim);
+  line-height: 1.4;
+}
+
+.highlight-sub { color: var(--text-dim); opacity: 0.7; }
+
+.tech-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.tech-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  text-align: center;
+}
+
+.tech-item .tech-name { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+.tech-item .tech-ver { font-size: 10px; color: var(--text-dim); font-family: "SF Mono", monospace; }
+
+.project-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 14px;
+  overflow: hidden;
+  transition: border-color 0.3s, transform 0.2s;
+  cursor: pointer;
+}
+
+.project-card:active { transform: scale(0.98); }
+
+.project-card.active {
+  border-color: var(--border-active);
+  box-shadow: 0 0 0 1px rgba(6,182,212,0.2), var(--shadow);
+}
+
+.card-header {
+  padding: 18px 18px 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.card-icon {
+  width: 44px; height: 44px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.card-icon.blue { background: rgba(59,130,246,0.15); color: #60a5fa; }
+.card-icon.cyan { background: rgba(6,182,212,0.15); color: #22d3ee; }
+.card-icon.amber { background: rgba(245,158,11,0.15); color: #fbbf24; }
+.card-icon.green { background: rgba(16,185,129,0.15); color: #34d399; }
+.card-icon.purple { background: rgba(139,92,246,0.15); color: #a78bfa; }
+.card-icon.rose { background: rgba(244,63,94,0.15); color: #fb7185; }
+
+.card-info { flex: 1; min-width: 0; }
+.card-name { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+.card-tagline { font-size: 12px; color: var(--text-mid); margin-bottom: 8px; }
+.card-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+
+.tag {
+  font-size: 10px;
+  font-family: "SF Mono", "Fira Code", monospace;
+  color: var(--text-dim);
+  background: rgba(30,41,59,0.6);
+  border: 1px solid var(--border);
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+.card-arrow {
+  color: var(--text-dim);
+  font-size: 16px;
+  transition: transform 0.3s;
+  flex-shrink: 0;
+  margin-top: 4px;
+  animation: arrowPulse 2s ease-in-out infinite;
+}
+
+@keyframes arrowPulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+.project-card.active .card-arrow { transform: rotate(90deg); color: var(--accent); animation: none; }
+
+.card-expand-hint {
+  font-size: 11px;
+  color: var(--text-dim);
+  text-align: center;
+  padding: 6px 0 10px;
+  opacity: 0.7;
+  letter-spacing: 1px;
+}
+
+.project-card.active .card-expand-hint { display: none; }
+
+.card-detail {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease;
+}
+
+.project-card.active .card-detail { max-height: 2000px; }
+
+.detail-inner {
+  padding: 0 18px 18px;
+  border-top: 1px solid var(--border);
+  margin-top: 0;
+}
+
+.detail-section { padding-top: 14px; }
+
+.detail-label {
+  font-size: 11px;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.detail-text { font-size: 13px; color: var(--text-mid); line-height: 1.7; }
+
+.feature-list { list-style: none; }
+
+.feature-list li {
+  font-size: 13px;
+  color: var(--text-mid);
+  padding: 5px 0;
+  padding-left: 18px;
+  position: relative;
+}
+
+.feature-list li::before {
+  content: '\25B8';
+  position: absolute;
+  left: 0;
+  color: var(--accent);
+}
+
+.arch-diagram {
+  background: rgba(6,182,212,0.04);
+  border: 1px solid rgba(6,182,212,0.15);
+  border-radius: 10px;
+  padding: 14px;
+  margin: 10px 0;
+  font-family: "SF Mono", "Fira Code", monospace;
+  font-size: 11px;
+  color: var(--text-mid);
+  line-height: 1.6;
+  white-space: pre;
+  overflow-x: auto;
+}
+
+.arch-diagram .hl { color: var(--accent); font-weight: 600; }
+.arch-diagram .dim { color: var(--text-dim); }
+.arch-diagram .arrow { color: var(--warn); }
+
+.gitee-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  margin-top: 14px;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.gitee-btn:active { transform: scale(0.97); opacity: 0.9; }
+
+.footer {
+  text-align: center;
+  padding: 30px 0 40px;
+  border-top: 1px solid var(--border);
+  margin-top: 20px;
+}
+
+.footer .contact-row {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.contact-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 18px;
+  border-radius: 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  text-decoration: none;
+  font-size: 13px;
+  color: var(--text-mid);
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.contact-btn:active { border-color: var(--accent); color: var(--accent); }
+
+.footer .copy { font-size: 11px; color: var(--text-dim); }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.project-card { animation: fadeUp 0.4s ease backwards; }
+.project-card:nth-child(1) { animation-delay: 0.05s; }
+.project-card:nth-child(2) { animation-delay: 0.1s; }
+.project-card:nth-child(3) { animation-delay: 0.15s; }
+.project-card:nth-child(4) { animation-delay: 0.2s; }
+.project-card:nth-child(5) { animation-delay: 0.25s; }
+
+@media (min-width: 768px) {
+  .container { max-width: 720px; padding: 0 24px; }
+  .header h1 { font-size: 28px; }
+  .header .bio { font-size: 15px; }
+  .card-name { font-size: 16px; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="header">
+    <div class="avatar">&#127911;</div>
+    <h1>ESP32-S3 多功能音频终端</h1>
+    <div class="title">ESP32-S3 · ESP-IDF v6.0.1 · ES8388 · GMF Pipeline</div>
+    <p class="bio">基于 ESP32-S3 的四合一音频平台：网络电台、WiFi声卡、USB声卡、录音播放，纯C实现，Web+串口双控</p>
+  </div>
+
+  <div class="stats">
+    <div class="stat-item">
+      <div class="num">4</div>
+      <div class="label">音频模式</div>
+    </div>
+    <div class="stat-item">
+      <div class="num">48k</div>
+      <div class="label">采样率 Hz</div>
+    </div>
+    <div class="stat-item">
+      <div class="num">8MB</div>
+      <div class="label">PSRAM</div>
+    </div>
+    <div class="stat-item">
+      <div class="num">2核</div>
+      <div class="label">CPU 核心</div>
+    </div>
+  </div>
+
+  <div class="overview">
+    <div class="overview-text">
+      本项目是一个<strong>多模式深度集成的嵌入式音频平台</strong>，以 ESP32-S3（Xtensa LX7 双核 240MHz）+ ES8388 Codec 为核心，实现<strong>网络电台 MP3 流播放、WiFi 声卡 UDP 透传、USB UAC2.0 声卡、SD 卡录音播放</strong>四大功能，四种模式互斥运行，共享 I2S/ES8388 硬件。<strong>GMF Pipeline 录音架构</strong>替代传统 RingBuffer 方案，Pipeline 复用避免内存碎片化。<strong>USB UAC2.0 描述符全面重构</strong>，解决 Windows 下 MIC+SPK 组合设备无声问题。
+    </div>
+    <div class="highlight-row">
+      <div class="highlight-item">
+        <div class="highlight-num">UAC2</div>
+        <div class="highlight-label">USB 声卡<br><span class="highlight-sub">16-bit 48kHz 双通道</span></div>
+      </div>
+      <div class="highlight-item">
+        <div class="highlight-num">GMF</div>
+        <div class="highlight-label">Pipeline 录音<br><span class="highlight-sub">ADF 下一代框架</span></div>
+      </div>
+      <div class="highlight-item">
+        <div class="highlight-num">IIR</div>
+        <div class="highlight-label">MIC 高通滤波<br><span class="highlight-sub">100Hz Butterworth</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">技术栈</div>
+  <div class="tech-grid">
+    <div class="tech-item"><div class="tech-name">ESP-IDF</div><div class="tech-ver">v6.0.1</div></div>
+    <div class="tech-item"><div class="tech-name">ES8388</div><div class="tech-ver">I2S Codec 16/24/32-bit</div></div>
+    <div class="tech-item"><div class="tech-name">TinyUSB</div><div class="tech-ver">UAC 2.0 协议栈</div></div>
+    <div class="tech-item"><div class="tech-name">ESP-GMF</div><div class="tech-ver">Pipeline 录音框架</div></div>
+    <div class="tech-item"><div class="tech-name">esp_codec_dev</div><div class="tech-ver">Codec 统一抽象层</div></div>
+    <div class="tech-item"><div class="tech-name">esp_audio_effects</div><div class="tech-ver">EQ/Sonic/ALC</div></div>
+    <div class="tech-item"><div class="tech-name">XL9555</div><div class="tech-ver">I2C IO 扩展器</div></div>
+    <div class="tech-item"><div class="tech-name">PSRAM</div><div class="tech-ver">OCT 8线 80MHz</div></div>
+    <div class="tech-item"><div class="tech-name">SD Card</div><div class="tech-ver">SPI 20MHz FAT32</div></div>
+    <div class="tech-item"><div class="tech-name">HTTP Server</div><div class="tech-ver">Web 控制界面</div></div>
+  </div>
+
+  <div class="section-title">模块详情</div>
+
+  <div class="project-card" onclick="toggleCard(this)">
+    <div class="card-header">
+      <div class="card-icon blue">&#128251;</div>
+      <div class="card-info">
+        <div class="card-name">网络电台</div>
+        <div class="card-tagline">HTTP MP3 流 · 三任务 Pipeline · Sonic 追直播</div>
+        <div class="card-tags">
+          <span class="tag">MP3</span>
+          <span class="tag">HTTP</span>
+          <span class="tag">Sonic</span>
+          <span class="tag">44.1k/48k</span>
+        </div>
+      </div>
+      <span class="card-arrow">&#8250;</span>
+    </div>
+    <div class="card-expand-hint">点击展开详情</div>
+    <div class="card-detail">
+      <div class="detail-inner">
+        <div class="detail-section">
+          <div class="detail-label">架构</div>
+          <div class="arch-diagram"><span class="hl">r_dl</span>(Core0) <span class="arrow">--16KB--></span> <span class="hl">r_dec</span>(Core1) <span class="arrow">--128KB--></span> <span class="hl">r_out</span>(Core0) <span class="arrow">--></span> I2S <span class="arrow">--></span> ES8388
+<span class="dim">HTTP拉流      MP3→PCM+重采样    Sonic变速+I2S写入</span></div>
+        </div>
+        <div class="detail-section">
+          <div class="detail-label">核心特性</div>
+          <ul class="feature-list">
+            <li>三任务 Pipeline：下载→解码→输出，RingBuffer 解耦</li>
+            <li>MP3 解码 + 采样率自适应（44.1k/48k 自动切换 I2S 时钟）</li>
+            <li>Sonic WSOLA 追直播：持续高位过滤+冷却期+PCM安全门，1%/2%两档加速</li>
+            <li>HTTP 自动重连（5次，2秒间隔），Web+串口双控</li>
+            <li>预置11个广东地区电台，支持自定义 URL</li>
+            <li>缓冲区水位自然波动周期约4秒，追直播算法避免误触发</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="project-card" onclick="toggleCard(this)">
+    <div class="card-header">
+      <div class="card-icon green">&#128225;</div>
+      <div class="card-info">
+        <div class="card-name">WiFi 声卡</div>
+        <div class="card-tagline">UDP PCM 透传 · WASAPI 环路捕获 · Sonic 防溢出</div>
+        <div class="card-tags">
+          <span class="tag">UDP</span>
+          <span class="tag">WASAPI</span>
+          <span class="tag">48kHz</span>
+          <span class="tag">Sonic</span>
+        </div>
+      </div>
+      <span class="card-arrow">&#8250;</span>
+    </div>
+    <div class="card-expand-hint">点击展开详情</div>
+    <div class="card-detail">
+      <div class="detail-inner">
+        <div class="detail-section">
+          <div class="detail-label">架构</div>
+          <div class="arch-diagram"><span class="hl">PC</span> <span class="arrow">--WASAPI--></span> <span class="hl">UDP 8888</span> <span class="arrow">--64KB--></span> <span class="hl">sc_out</span>(Core0) <span class="arrow">--></span> I2S <span class="arrow">--></span> ES8388
+<span class="dim">环路捕获       裸PCM 48k/16b/2ch   Sonic变速+I2S写入</span></div>
+        </div>
+        <div class="detail-section">
+          <div class="detail-label">核心特性</div>
+          <ul class="feature-list">
+            <li>PC端 WASAPI Loopback 捕获系统音频，Python 脚本 UDP 发送</li>
+            <li>ESP32 UDP 接收 + 64KB PSRAM RingBuffer + Sonic 变速防溢出</li>
+            <li>序号追踪丢包检测，Web 一键切换</li>
+            <li>延迟约100-400ms，建议 PC 端静音避免回声</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="project-card" onclick="toggleCard(this)">
+    <div class="card-header">
+      <div class="card-icon amber">&#128268;</div>
+      <div class="card-info">
+        <div class="card-name">USB 声卡</div>
+        <div class="card-tagline">UAC 2.0 · 描述符重构 · MIC 高通滤波 · NVS 音量</div>
+        <div class="card-tags">
+          <span class="tag">UAC2</span>
+          <span class="tag">TinyUSB</span>
+          <span class="tag">IIR/FIR</span>
+          <span class="tag">NVS</span>
+        </div>
+      </div>
+      <span class="card-arrow">&#8250;</span>
+    </div>
+    <div class="card-expand-hint">点击展开详情</div>
+    <div class="card-detail">
+      <div class="detail-inner">
+        <div class="detail-section">
+          <div class="detail-label">架构</div>
+          <div class="arch-diagram"><span class="hl">PC</span> <span class="arrow">--USB--></span> UAC2 <span class="arrow">--output_cb--></span> RingBuf(64KB) <span class="arrow">--></span> I2S <span class="arrow">--></span> ES8388
+<span class="hl">ES8388 ADC</span> <span class="arrow">--></span> I2S <span class="arrow">--input_cb--></span> <span class="hl">mic_filter</span> <span class="arrow">--></span> UAC2 <span class="arrow">--USB--></span> <span class="hl">PC</span></div>
+        </div>
+        <div class="detail-section">
+          <div class="detail-label">描述符重构（关键修复）</div>
+          <ul class="feature-list">
+            <li>bCategory 改 UNDEF(0x00)，避免 Windows 对 Headset 的特殊处理导致 MIC=1 时 SPK 无声</li>
+            <li>双独立 Clock Source（SPK_CLOCK=0x01, MIC_CLOCK=0x05），Windows USBAudio2 驱动要求</li>
+            <li>MIC Input Terminal type 改 0x0201（物理麦克风），bmChannelConfig 改 FL+FR</li>
+            <li>SPK 改 Adaptive 模式（去掉 Feedback EP），节省 DWC2 FIFO 空间</li>
+            <li>DWC2 DFIFO 仅 200 words，16-bit/48kHz/2ch MIC+SPK 是唯一可靠配置</li>
+          </ul>
+        </div>
+        <div class="detail-section">
+          <div class="detail-label">MIC 高通滤波器</div>
+          <ul class="feature-list">
+            <li>IIR 双二阶（esp_ae_eq）：fc=100Hz, Q=0.707 Butterworth，CPU ~2%</li>
+            <li>FIR 64阶（Q15 定点）：窗函数法设计，先低通再互补得高通，CPU ~7%</li>
+            <li>运行时串口切换：mic_filter none|iir|fir [cutoff_hz]</li>
+            <li>USB 声卡路径（input_cb）和录音路径（post_read_cb）双路集成</li>
+          </ul>
+        </div>
+        <div class="detail-section">
+          <div class="detail-label">音量管理</div>
+          <ul class="feature-list">
+            <li>UAC2 音量映射：-50dB~0dB → 0~100%，(int32_t) 修复负数转换 bug</li>
+            <li>NVS 持久化：保存 SPK 音量 raw 值，重启恢复，默认 -25dB(50%)</li>
+            <li>16/24/32-bit + 1/2ch 全组合自适应，sdkconfig 配置无需改代码</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="project-card" onclick="toggleCard(this)">
+    <div class="card-header">
+      <div class="card-icon purple">&#127908;</div>
+      <div class="card-info">
+        <div class="card-name">录音播放</div>
+        <div class="card-tagline">GMF Pipeline · SD 卡 · WAV 容器 · Pipeline 复用</div>
+        <div class="card-tags">
+          <span class="tag">GMF</span>
+          <span class="tag">SD卡</span>
+          <span class="tag">WAV</span>
+          <span class="tag">Pipeline复用</span>
+        </div>
+      </div>
+      <span class="card-arrow">&#8250;</span>
+    </div>
+    <div class="card-expand-hint">点击展开详情</div>
+    <div class="card-detail">
+      <div class="detail-inner">
+        <div class="detail-section">
+          <div class="detail-label">架构</div>
+          <div class="arch-diagram"><span class="hl">io_codec_dev</span> <span class="arrow">--databus--></span> <span class="hl">aud_enc</span> <span class="arrow">--></span> <span class="hl">aud_muxer</span> <span class="arrow">--></span> <span class="hl">io_file</span> <span class="arrow">--></span> SD卡
+<span class="dim">I2S Reader      PCM编码器      WAV容器(STREAMING)  文件写入</span>
+<span class="dim">post_read_cb → mic_filter_process (IIR高通)</span></div>
+        </div>
+        <div class="detail-section">
+          <div class="detail-label">核心特性</div>
+          <ul class="feature-list">
+            <li>ESP-GMF Pipeline（ADF 下一代框架），组件化设计替代传统 RingBuffer 方案</li>
+            <li>io_codec_dev 直接使用 esp_codec_dev 句柄，post_read_cb 集成 MIC 高通滤波</li>
+            <li>aud_muxer STREAMING 模式通过 databus 传数据，无需 url_pattern 回调</li>
+            <li>WAV 头自动修正：录音停止后回写 RIFF/data size</li>
+            <li>SD 卡 SPI 模式 20MHz，3 次重试挂载机制</li>
+          </ul>
+        </div>
+        <div class="detail-section">
+          <div class="detail-label">GMF 框架 Bug 修复</div>
+          <ul class="feature-list">
+            <li>double-free 修复：databus 路径 needs_free=0，port_reset 清零 buf/needs_free</li>
+            <li>post_read_cb 扩展：esp_gmf_io_buffer_cfg_t 新增回调字段</li>
+            <li>Pipeline 复用：reset+loading_jobs，不再 destroy 避免 OOM（第二次录音 3840B 分配失败）</li>
+            <li>MIC 滤波器复用：mic_filter_reset() 重置 FIR delay line，不销毁实例</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="project-card" onclick="toggleCard(this)">
+    <div class="card-header">
+      <div class="card-icon rose">&#9881;</div>
+      <div class="card-info">
+        <div class="card-name">内存管理与硬件驱动</div>
+        <div class="card-tagline">PSRAM 精细调度 · SPI 总线复用 · 双核任务分配</div>
+        <div class="card-tags">
+          <span class="tag">PSRAM</span>
+          <span class="tag">DMA</span>
+          <span class="tag">SPI复用</span>
+          <span class="tag">Core0/Core1</span>
+        </div>
+      </div>
+      <span class="card-arrow">&#8250;</span>
+    </div>
+    <div class="card-expand-hint">点击展开详情</div>
+    <div class="card-detail">
+      <div class="detail-inner">
+        <div class="detail-section">
+          <div class="detail-label">PSRAM 内存规划</div>
+          <ul class="feature-list">
+            <li>音频工作缓冲区全部 heap_caps_malloc(PSRAM)，释放内部 RAM 压力</li>
+            <li>RingBuffer 显式分配 PSRAM：MP3 16KB + PCM 128KB + WiFi 64KB + USB 64KB</li>
+            <li>CONFIG_SPIRAM_MALLOC_ALWAYSINTERNAL=8192，小对象留内部 RAM</li>
+            <li>CONFIG_SPIRAM_MALLOC_RESERVE_INTERNAL=32768，保留 32KB 防挤占</li>
+            <li>BSS 段 + 任务栈可放 PSRAM，WiFi/LWIP 缓冲区自动分配至 PSRAM</li>
+          </ul>
+        </div>
+        <div class="detail-section">
+          <div class="detail-label">SPI 总线复用</div>
+          <ul class="feature-list">
+            <li>SPI2_HOST 被 LCD 和 SD 卡共用（SCLK=12, MOSI=11, MISO=13）</li>
+            <li>仅 CS 不同（LCD=GPIO21, SD=GPIO2），spi_bus_initialize 返回 ESP_ERR_INVALID_STATE 时跳过</li>
+            <li>SD 卡 3 次重试 + 500ms 间隔 + 失败后 unmount 清理</li>
+          </ul>
+        </div>
+        <div class="detail-section">
+          <div class="detail-label">双核任务分配</div>
+          <ul class="feature-list">
+            <li>Core 0：WiFi/LWIP、HTTP 下载、I2S 输出、Web 服务器</li>
+            <li>Core 1：MP3 解码、GMF 录音 Pipeline、io_codec_dev、io_file</li>
+            <li>Console REPL 栈 4096→8192，httpd 栈 8192→12288</li>
+            <li>分区表：factory 2MB + storage 7.44MB（固件 1.5MB 超出原 1.5MB 分区后扩容）</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">同系项目：STM32F407 USB 声卡</div>
+
+  <div class="overview">
+    <div class="overview-text">
+      同为 USB 声卡项目，但基于<strong>STM32F407 + RT-Thread + CherryUSB</strong>实现，与 ESP32-S3 项目形成对比。两者都实现了 UAC2.0 Speaker，但<strong>协议栈、RTOS、Codec、数据流架构</strong>完全不同，体现了不同硬件平台的方案选型思路。
+    </div>
+    <div class="highlight-row">
+      <div class="highlight-item">
+        <div class="highlight-num">CherryUSB</div>
+        <div class="highlight-label">USB 协议栈<br><span class="highlight-sub">v1.6.1 UAC2</span></div>
+      </div>
+      <div class="highlight-item">
+        <div class="highlight-num">RT-Thread</div>
+        <div class="highlight-label">RTOS<br><span class="highlight-sub">v5.1.0</span></div>
+      </div>
+      <div class="highlight-item">
+        <div class="highlight-num">WM8978</div>
+        <div class="highlight-label">Codec<br><span class="highlight-sub">16-bit DAC</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tech-grid">
+    <div class="tech-item"><div class="tech-name">STM32F407</div><div class="tech-ver">Cortex-M4 168MHz</div></div>
+    <div class="tech-item"><div class="tech-name">RT-Thread</div><div class="tech-ver">v5.1.0</div></div>
+    <div class="tech-item"><div class="tech-name">CherryUSB</div><div class="tech-ver">v1.6.1 UAC2</div></div>
+    <div class="tech-item"><div class="tech-name">WM8978</div><div class="tech-ver">I2C 0x1A</div></div>
+    <div class="tech-item"><div class="tech-name">I2S2</div><div class="tech-ver">Philips 16-bit 48kHz</div></div>
+    <div class="tech-item"><div class="tech-name">USB OTG FS</div><div class="tech-ver">Full Speed</div></div>
+  </div>
+
+  <div class="project-card" onclick="toggleCard(this)">
+    <div class="card-header">
+      <div class="card-icon blue">&#128268;</div>
+      <div class="card-info">
+        <div class="card-name">STM32F407 USB 声卡 (CherryUSB)</div>
+        <div class="card-tagline">UAC2.0 · WM8978 · RingBuffer + Circular DMA · 预填充策略</div>
+        <div class="card-tags">
+          <span class="tag">CherryUSB</span>
+          <span class="tag">UAC2</span>
+          <span class="tag">WM8978</span>
+          <span class="tag">DMA</span>
+          <span class="tag">RT-Thread</span>
+        </div>
+      </div>
+      <span class="card-arrow">&#8250;</span>
+    </div>
+    <div class="card-expand-hint">点击展开详情</div>
+    <div class="card-detail">
+      <div class="detail-inner">
+        <div class="detail-section">
+          <div class="detail-label">数据流架构</div>
+          <div class="arch-diagram"><span class="hl">PC</span> <span class="arrow">--USB ISO OUT--></span> <span class="hl">CherryUSB</span> <span class="arrow">--rb_put--></span> <span class="hl">RingBuf(16KB)</span> <span class="arrow">--预填充--></span> <span class="hl">Circular DMA</span> <span class="arrow">--></span> I2S2 <span class="arrow">--></span> WM8978
+<span class="dim">192B/ms 48k/16b/2ch   ISO中断上下文       1920B(10ms)门槛    960样本循环缓冲    Half/Full回调</span></div>
+        </div>
+        <div class="detail-section">
+          <div class="detail-label">核心特性</div>
+          <ul class="feature-list">
+            <li>CherryUSB v1.6.1 UAC2.0 Speaker，覆盖弱函数回调实现自定义逻辑</li>
+            <li>WM8978 Codec：17步初始化流程，I2C 7位地址+9位数据=16位写入，不支持读操作</li>
+            <li>预填充策略：RingBuffer 积累满 1920 字节(≈10ms) 后才启动 DMA，避免空数据"嘟"声</li>
+            <li>Underrun 处理：数据不足时保持上次数据不填零，避免突变噪声</li>
+            <li>USB 音量映射：-60dB~0dB → 0~63 WM8978 音量等级</li>
+            <li>Circular DMA 双缓冲：Half/Full Complete 回调交替填充，零拷贝</li>
+          </ul>
+        </div>
+        <div class="detail-section">
+          <div class="detail-label">踩坑记录</div>
+          <ul class="feature-list">
+            <li>RT-Thread 内置 USB Audio 驱动 3 个 Bug：端点 bmAttributes 不匹配、AC Header wTotalLength 计算错误、SET_CUR 请求逻辑错误 → 改用 CherryUSB</li>
+            <li>CherryUSB 模板宏 PKG_CHERRYUSB_DEVICE_TEMPLATE_AUDIO_V2_MIC_SPEAKER 与自定义代码链接冲突(multiple definition) → 注释掉模板宏</li>
+            <li>BSP drv_usbd.c 与 CherryUSB DWC2 驱动都处理 USB OTG 中断 → board.h 注释 BSP_USING_USBDEVICE</li>
+            <li>HAL_I2S_TxCpltCallback 重复定义 → drv_audio_wm8978.c 中 #ifndef PKG_USING_CHERRYUSB 保护</li>
+            <li>rtconfig.h 被 RT-Thread Settings 覆盖：DWC2_ST 被改回 CUSTOM、模板宏被重新启用</li>
+          </ul>
+        </div>
+        <div class="detail-section">
+          <div class="detail-label">与 ESP32-S3 声卡对比</div>
+          <div class="arch-diagram" style="font-size:10px;line-height:1.8"><span class="hl">           STM32F407                    ESP32-S3</span>
+<span class="dim">协议栈     CherryUSB v1.6.1             TinyUSB (usb_device_uac)</span>
+<span class="dim">RTOS       RT-Thread v5.1.0             FreeRTOS (ESP-IDF)</span>
+<span class="dim">Codec      WM8978 (I2C, 不支持读)       ES8388 (I2C, 支持读写)</span>
+<span class="dim">I2S        I2S2 全双工, Circular DMA    I2S STD, DMA 6×480帧</span>
+<span class="dim">数据流     RingBuf → Circular DMA       RingBuf → i2s_output_task</span>
+<span class="dim">MIC        无                           有 (IIR/FIR高通滤波)</span>
+<span class="dim">录音       无                           GMF Pipeline → SD卡</span>
+<span class="dim">音量       -60~0dB → WM8978 0~63       -50~0dB → 0~100% + NVS</span>
+<span class="dim">描述符     CherryUSB模板(已替换)         全面重构(双Clock/UNDEF)</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="contact-row">
+      <a class="contact-btn" href="https://gitee.com/fszzh" target="_blank" title="Gitee 主页">Gitee</a>
+    </div>
+    <p class="copy">ESP32-S3 + ES8388 多功能音频终端 · ESP-IDF v6.0.1</p>
+  </div>
+
+</div>
+
+<script>
+function toggleCard(card) {
+  const wasActive = card.classList.contains('active');
+  document.querySelectorAll('.project-card').forEach(c => c.classList.remove('active'));
+  if (!wasActive) {
+    card.classList.add('active');
+  }
+}
+</script>
+
+</body>
+</html>
