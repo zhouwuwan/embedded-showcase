@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>STM32H743 嵌入式综合平台</title>
+<title>STM32H743 项目作品集</title>
 <style>
 /* ===== 主题变量 ===== */
 :root {
@@ -19,7 +19,6 @@
   --accent-2: #3b82f6;
   --warn: #f59e0b;
   --success: #10b981;
-  --danger: #ef4444;
   --radius: 14px;
   --shadow: 0 4px 24px rgba(0,0,0,0.4);
 }
@@ -437,7 +436,6 @@ body::before {
 .card-icon.amber { background: rgba(245,158,11,0.15); color: #fbbf24; }
 .card-icon.green { background: rgba(16,185,129,0.15); color: #34d399; }
 .card-icon.purple { background: rgba(139,92,246,0.15); color: #a78bfa; }
-.card-icon.red { background: rgba(239,68,68,0.15); color: #f87171; }
 
 .card-info { flex: 1; min-width: 0; }
 
@@ -465,9 +463,6 @@ body::before {
   padding: 2px 7px;
   border-radius: 4px;
 }
-
-.tag.success { color: var(--success); border-color: rgba(16,185,129,0.3); background: rgba(16,185,129,0.08); }
-.tag.warn { color: var(--warn); border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.08); }
 
 .card-arrow {
   color: var(--text-dim);
@@ -504,7 +499,7 @@ body::before {
 }
 
 .project-card.active .card-detail {
-  max-height: 2000px;
+  max-height: 1200px;
 }
 
 .detail-inner {
@@ -550,31 +545,6 @@ body::before {
   left: 0;
   color: var(--accent);
 }
-
-.feature-list li.success::before { content: '✓'; color: var(--success); }
-.feature-list li.warn::before { content: '⚠'; color: var(--warn); }
-
-/* ===== 状态徽章 ===== */
-.badge-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin: 10px 0;
-}
-
-.badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 11px;
-  padding: 3px 10px;
-  border-radius: 12px;
-  font-weight: 600;
-}
-
-.badge.pass { background: rgba(16,185,129,0.12); color: var(--success); border: 1px solid rgba(16,185,129,0.3); }
-.badge.fail { background: rgba(239,68,68,0.12); color: var(--danger); border: 1px solid rgba(239,68,68,0.3); }
-.badge.pending { background: rgba(245,158,11,0.12); color: var(--warn); border: 1px solid rgba(245,158,11,0.3); }
 
 /* ===== 视频占位 ===== */
 .video-placeholder {
@@ -720,8 +690,6 @@ body::before {
 .project-card:nth-child(3) { animation-delay: 0.15s; }
 .project-card:nth-child(4) { animation-delay: 0.2s; }
 .project-card:nth-child(5) { animation-delay: 0.25s; }
-.project-card:nth-child(6) { animation-delay: 0.3s; }
-.project-card:nth-child(7) { animation-delay: 0.35s; }
 
 /* ===== 桌面端适配 ===== */
 @media (min-width: 768px) {
@@ -730,6 +698,7 @@ body::before {
   .header .bio { font-size: 15px; }
   .card-name { font-size: 16px; }
 }
+
 
 </style>
 </head>
@@ -740,15 +709,15 @@ body::before {
   <!-- ===== 个人简介 ===== -->
   <div class="header">
     <div class="avatar">嵌入式</div>
-    <h1>STM32H743 嵌入式综合平台</h1>
-    <div class="title">Bootloader + App · 华为云IoT OTA · 系统自愈 · 故障诊断</div>
-    <p class="bio">从 Bootloader 到应用层完整自研的嵌入式综合平台，集成华为云 IoT OTA、系统卡死自愈、故障现场保存与远程上报、LVGL GUI、WiFi 通信于一体</p>
+    <h1>STM32H743 项目作品集</h1>
+    <div class="title">STM32H743 · RT-Thread · LVGL</div>
+    <p class="bio">以 STM32H743 为核心的自研嵌入式综合平台，集成华为云 IoT OTA、LVGL 图形界面、WiFi 无线通信于一体</p>
   </div>
 
   <!-- ===== 统计 ===== -->
   <div class="stats">
     <div class="stat-item">
-      <div class="num">7</div>
+      <div class="num">4</div>
       <div class="label">核心模块</div>
     </div>
     <div class="stat-item">
@@ -756,32 +725,32 @@ body::before {
       <div class="label">主频 Hz</div>
     </div>
     <div class="stat-item">
-      <div class="num">50FPS</div>
-      <div class="label">LVGL</div>
+      <div class="num">45+</div>
+      <div class="label">LVGL FPS</div>
     </div>
   </div>
 
   <!-- ===== 项目概述 ===== -->
   <div class="overview">
     <div class="overview-text">
-      本项目是一个<strong>从 Bootloader 到应用层完整自研的嵌入式综合平台</strong>，不是单一功能的 Demo。以 STM32H743（Cortex-M7 @480MHz）为核心，涵盖<strong>华为云 IoT OTA 远程升级、系统卡死自愈与故障诊断、LVGL 触摸屏 GUI、ESP-Hosted WiFi 通信、SDRAM/QSPI Flash 存储管理</strong>五大子系统，各模块协同工作而非独立堆叠。
+      本项目是一个<strong>多子系统深度集成的嵌入式综合平台</strong>，不是单一功能的 Demo。以 STM32H743（Cortex-M7 @480MHz）为核心，从 Bootloader 到应用层完整自研，涵盖<strong>华为云 IoT OTA 远程升级、LVGL 触摸屏 GUI、ESP-Hosted WiFi 通信、SDRAM/QSPI Flash 存储管理</strong>四大子系统，各模块协同工作而非独立堆叠。
     </div>
     <div class="highlight-row">
       <div class="highlight-item">
-        <div class="highlight-num">7737</div>
+        <div class="highlight-num">7500+</div>
         <div class="highlight-label">TCP 吞吐 kbps<br><span class="highlight-sub">iperf3 实测</span></div>
+      </div>
+      <div class="highlight-item">
+        <div class="highlight-num">~1MB/s</div>
+        <div class="highlight-label">WiFi 实际带宽<br><span class="highlight-sub">ESP-Hosted SPI</span></div>
       </div>
       <div class="highlight-item">
         <div class="highlight-num">50FPS</div>
         <div class="highlight-label">LVGL 刷新率<br><span class="highlight-sub">800×480 双缓冲</span></div>
       </div>
-      <div class="highlight-item">
-        <div class="highlight-num">30s</div>
-        <div class="highlight-label">卡死自愈<br><span class="highlight-sub">syswatch + IWDG</span></div>
-      </div>
     </div>
     <div class="overview-text" style="margin-top:10px;">
-      系统亮点：LTDC 行中断同步彻底消除屏幕撕裂；OTA 断点续传 + 防降级 + 自动回滚确保固件安全；syswatch 线程卡死自愈（30s 无 idle 调度触发复位，IWDG 10s 硬件兜底）；HardFault 现场保存到 Backup SRAM 并通过 MQTT 上报到华为云；复位事件（thread_stuck/stack_overflow/heap_exhausted）自动上报；<strong>4 区域 MPU Cache 策略</strong>（DTCM 零等待 / AXI Write-Back / SRAM4 Non-Cacheable / SDRAM Write-Back），D-Cache 一致性管理确保 DMA2D、MDMA、LTDC 并发无数据错乱；<strong>链接脚本 5 区域内存布局</strong>（ROM/DTCM/AXI/SDRAM/SRAM4），多 RAM 混合调度（AXI memheap 绑定 LVGL、SRAM4 固定块内存池供 DMA、SDRAM 帧缓冲、DTCM 系统堆+栈）。全栈从 CubeMX 引脚配置到应用层 UI 均独立完成。
+      系统亮点：LTDC 行中断同步彻底消除屏幕撕裂；OTA 断点续传 + CRC32 校验确保固件安全；SDRAM 时序 Bug 修复后随机访问提升 5.3 倍；<strong>4 区域 MPU Cache 策略</strong>（DTCM 零等待 / AXI Write-Back / SRAM4 Non-Cacheable / SDRAM Write-Back），D-Cache 一致性管理确保 DMA2D、MDMA、LTDC 并发无数据错乱；<strong>链接脚本 5 区域内存布局</strong>（ROM/DTCM/AXI/SDRAM/SRAM4），多 RAM 混合调度（AXI memheap 绑定 LVGL、SRAM4 固定块内存池供 DMA、SDRAM 帧缓冲、DTCM 系统堆+栈）。全栈从 CubeMX 引脚配置到应用层 UI 均独立完成。
     </div>
   </div>
 
@@ -793,19 +762,20 @@ body::before {
     <div class="tech-item"><div class="tech-name">MPU + D-Cache</div><div class="tech-ver">4 区域 Cache 策略</div></div>
     <div class="tech-item"><div class="tech-name">LVGL</div><div class="tech-ver">v8.3.10</div></div>
     <div class="tech-item"><div class="tech-name">DMA2D</div><div class="tech-ver">硬件 2D 加速</div></div>
+    <div class="tech-item"><div class="tech-name">JPEG 硬解</div><div class="tech-ver">MDMA 零拷贝</div></div>
     <div class="tech-item"><div class="tech-name">LTDC</div><div class="tech-ver">LCD 控制器</div></div>
-    <div class="tech-item"><div class="tech-name">华为云 IoT</div><div class="tech-ver">MQTTS + OTA</div></div>
-    <div class="tech-item"><div class="tech-name">syswatch</div><div class="tech-ver">线程卡死自愈</div></div>
+    <div class="tech-item"><div class="tech-name">华为云 IoT</div><div class="tech-ver">MQTT + OTA</div></div>
+    <div class="tech-item"><div class="tech-name">LwIP</div><div class="tech-ver">TCP/IP 协议栈</div></div>
     <div class="tech-item"><div class="tech-name">ESP-Hosted</div><div class="tech-ver">SPI 37.5MHz</div></div>
     <div class="tech-item"><div class="tech-name">mbedTLS</div><div class="tech-ver">v2.28.1 TLS</div></div>
-    <div class="tech-item"><div class="tech-name">EasyFlash</div><div class="tech-ver">v4.1 参数持久化</div></div>
-    <div class="tech-item"><div class="tech-name">QBoot</div><div class="tech-ver">Bootloader + 防降级</div></div>
+    <div class="tech-item"><div class="tech-name">Paho MQTT</div><div class="tech-ver">MQTT 客户端</div></div>
     <div class="tech-item"><div class="tech-name">FAL</div><div class="tech-ver">Flash 抽象层</div></div>
     <div class="tech-item"><div class="tech-name">SDRAM</div><div class="tech-ver">32MB W9825G6KH</div></div>
     <div class="tech-item"><div class="tech-name">W25Q64</div><div class="tech-ver">QSPI Flash 8MB</div></div>
-    <div class="tech-item"><div class="tech-name">Backup SRAM</div><div class="tech-ver">4KB 故障现场</div></div>
+    <div class="tech-item"><div class="tech-name">Webclient</div><div class="tech-ver">v2.2.0 HTTP</div></div>
     <div class="tech-item"><div class="tech-name">GT911</div><div class="tech-ver">电容触摸 I2C</div></div>
     <div class="tech-item"><div class="tech-name">cJSON</div><div class="tech-ver">v1.7.17</div></div>
+    <div class="tech-item"><div class="tech-name">EasyFlash</div><div class="tech-ver">参数持久化</div></div>
   </div>
 
   <!-- ===== 开发工具 ===== -->
@@ -901,7 +871,7 @@ body::before {
       </div>
       <div class="test-info">
         <div class="test-title">LVGL 帧率测试</div>
-        <div class="test-desc">800×480 全屏双缓冲 + DMA2D 加速 + LTDC 行中断防撕裂；静态 45+ FPS，动态 33+ FPS</div>
+        <div class="test-desc">800×480 全屏双缓冲 + DMA2D 加速 + LTDC 行中断防撕裂；lv_timer_handler() 自适应刷新，静态 45+ FPS，动态 33+ FPS</div>
       </div>
     </div>
 
@@ -940,12 +910,14 @@ body::before {
         </div>
       </div>
       <div class="test-info">
-        <div class="test-title">OTA 远程固件升级 + 断点续传</div>
-        <div class="test-desc">MQTT 通知 → HTTPS 下载 → 断点续传（方案B） → CRC32 校验 → Flash 写入 → 重启升级 → 防降级检查</div>
+        <div class="test-title">OTA 远程固件升级</div>
+        <div class="test-desc">MQTT 通知升级 → HTTPS 分片下载 → 断点续传 → CRC32 校验 → Flash 写入 → 重启升级</div>
       </div>
     </div>
 
+
     <div class="test-card">
+
       <div class="test-img-wrap" style="background:linear-gradient(135deg,#0a1628,#0f1d32);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;padding:16px">
         <div style="display:flex;align-items:center;gap:8px;width:100%;justify-content:center">
           <div style="text-align:center;flex:1">
@@ -979,97 +951,6 @@ body::before {
       </div>
     </div>
 
-    <div class="test-card">
-      <div class="test-img-wrap" style="background:linear-gradient(135deg,#0a1628,#0f1d32);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;padding:16px">
-        <div style="display:flex;align-items:center;gap:6px;width:100%;justify-content:center">
-          <div style="text-align:center;flex:1">
-            <div style="color:var(--danger);font-size:16px;font-weight:700">HardFault</div>
-            <div style="color:var(--text-dim);font-size:10px;margin-top:2px">空指针访问触发</div>
-          </div>
-          <div style="color:var(--accent);font-size:16px">→</div>
-          <div style="text-align:center;flex:1">
-            <div style="color:var(--warn);font-size:16px;font-weight:700">Backup SRAM</div>
-            <div style="color:var(--text-dim);font-size:10px;margin-top:2px">PC/LR/CFSR 保存</div>
-          </div>
-          <div style="color:var(--accent);font-size:16px">→</div>
-          <div style="text-align:center;flex:1">
-            <div style="color:var(--accent);font-size:16px;font-weight:700">MQTT 上报</div>
-            <div style="color:var(--text-dim);font-size:10px;margin-top:2px">event=hardfault</div>
-          </div>
-        </div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:4px">
-          <span style="font-size:10px;color:var(--success);background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);padding:2px 8px;border-radius:8px">PC=0x0808A2B4</span>
-          <span style="font-size:10px;color:var(--success);background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);padding:2px 8px;border-radius:8px">LR=0x0808A3C0</span>
-          <span style="font-size:10px;color:var(--success);background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);padding:2px 8px;border-radius:8px">CFSR=0x00000082</span>
-        </div>
-      </div>
-      <div class="test-info">
-        <div class="test-title">HardFault 现场保存与 MQTT 上报</div>
-        <div class="test-desc">空指针触发 HardFault → 现场保存到 Backup SRAM(PC/LR/CFSR) → 重启后 MQTT 上报到华为云 → 平台显示 event=hardfault</div>
-      </div>
-    </div>
-
-    <div class="test-card">
-      <div class="test-img-wrap" style="background:linear-gradient(135deg,#0a1628,#0f1d32);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;padding:16px">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%">
-          <div style="text-align:center;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:8px 4px">
-            <div style="color:var(--danger);font-size:13px;font-weight:700">thread_stuck</div>
-            <div style="color:var(--text-dim);font-size:10px;margin-top:2px">syswatch 30s 超时</div>
-          </div>
-          <div style="text-align:center;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:8px;padding:8px 4px">
-            <div style="color:var(--warn);font-size:13px;font-weight:700">stack_overflow</div>
-            <div style="color:var(--text-dim);font-size:10px;margin-top:2px">stack_eat 递归触发</div>
-          </div>
-          <div style="text-align:center;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:8px;padding:8px 4px">
-            <div style="color:var(--warn);font-size:13px;font-weight:700">heap_exhausted</div>
-            <div style="color:var(--text-dim);font-size:10px;margin-top:2px">heap_eat 消耗触发</div>
-          </div>
-          <div style="text-align:center;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:8px 4px">
-            <div style="color:var(--danger);font-size:13px;font-weight:700">iwdg_timeout</div>
-            <div style="color:var(--text-dim);font-size:10px;margin-top:2px">IWDG 10s 硬件兜底</div>
-          </div>
-        </div>
-        <div style="color:var(--accent);font-size:11px;margin-top:2px">全部通过 MQTT 上报 event=reset_event</div>
-      </div>
-      <div class="test-info">
-        <div class="test-title">复位事件上报（thread_stuck / stack_overflow / heap_exhausted）</div>
-        <div class="test-desc">stack_eat 递归消耗栈 → 复位前保存 RESET_EVENT_STACK_OVF → 重启后 MQTT 上报 event=reset_event, event_detail=stack_overflow</div>
-      </div>
-    </div>
-
-    <div class="test-card">
-      <div class="test-img-wrap" style="background:linear-gradient(135deg,#0a1628,#0f1d32);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;padding:16px">
-        <div style="width:100%;height:8px;background:rgba(30,41,59,0.6);border-radius:4px;overflow:hidden;position:relative">
-          <div style="width:7%;height:100%;background:linear-gradient(90deg,var(--warn),var(--danger));border-radius:4px"></div>
-        </div>
-        <div style="display:flex;align-items:center;gap:6px;width:100%;justify-content:center">
-          <div style="text-align:center;flex:1">
-            <div style="color:var(--danger);font-size:14px;font-weight:700">断电中断</div>
-            <div style="color:var(--text-dim);font-size:10px;margin-top:2px">下载到 7%</div>
-          </div>
-          <div style="color:var(--accent);font-size:16px">→</div>
-          <div style="text-align:center;flex:1">
-            <div style="color:var(--warn);font-size:14px;font-weight:700">上报失败</div>
-            <div style="color:var(--text-dim);font-size:10px;margin-top:2px">result_code=6</div>
-          </div>
-          <div style="color:var(--accent);font-size:16px">→</div>
-          <div style="text-align:center;flex:1">
-            <div style="color:var(--accent);font-size:14px;font-weight:700">重新下发</div>
-            <div style="color:var(--text-dim);font-size:10px;margin-top:2px">云端通知</div>
-          </div>
-          <div style="color:var(--accent);font-size:16px">→</div>
-          <div style="text-align:center;flex:1">
-            <div style="color:var(--success);font-size:14px;font-weight:700">重新下载</div>
-            <div style="color:var(--text-dim);font-size:10px;margin-top:2px">从 0% 开始</div>
-          </div>
-        </div>
-      </div>
-      <div class="test-info">
-        <div class="test-title">OTA 断点续传（方案B）</div>
-        <div class="test-desc">下载中断电 → 重启检测到未完成进度 → 上报失败(result_code=6) → 清除进度 → 云端重新下发 → 从头下载</div>
-      </div>
-    </div>
-
   </div>
 
   <!-- ===== 项目卡片列表 ===== -->
@@ -1081,13 +962,12 @@ body::before {
       <div class="card-icon blue">☁</div>
       <div class="card-info">
         <div class="card-name">华为云 IoT 通信与 OTA 升级系统</div>
-        <div class="card-tagline">MQTTS · HTTPS 断点续传 · 防降级 · 自动回滚</div>
+        <div class="card-tagline">MQTTS 属性上报 · HTTPS 分片下载 · 断点续传 · CRC32 校验</div>
         <div class="card-tags">
           <span class="tag">MQTT</span>
           <span class="tag">mbedTLS</span>
           <span class="tag">FAL</span>
-          <span class="tag">断点续传</span>
-          <span class="tag">防降级</span>
+          <span class="tag">QSPI Flash</span>
         </div>
       </div>
       <span class="card-arrow">›</span>
@@ -1097,23 +977,20 @@ body::before {
       <div class="detail-inner">
         <div class="detail-section">
           <div class="detail-label">项目描述</div>
-          <p class="detail-text">基于华为云 IoT 平台的设备通信与远程升级系统。MQTTS 协议实现设备认证与属性上报，OTA 升级采用 HTTPS 分片下载，支持断点续传（方案B）与 CRC32 校验，配合 Bootloader 实现防降级、自动回滚、搬移断电保护。</p>
+          <p class="detail-text">基于华为云 IoT 平台的设备通信与远程升级系统。MQTT/MQTTS 协议实现设备认证与属性上报，OTA 升级采用 HTTPS 分片下载，支持断点续传与 CRC32 校验，确保固件安全可靠。</p>
         </div>
         <div class="detail-section">
           <div class="detail-label">核心特性</div>
           <ul class="feature-list">
-            <li>MQTTS 加密连接，HMAC-SHA256 设备认证</li>
-            <li>OTA 断点续传（方案B）：断电后上报失败，等待云端重新下发</li>
-            <li>防降级：版本号比较，拒绝降级升级</li>
-            <li>自动回滚：boot_count > 3 从 factory 分区恢复</li>
-            <li>搬移断电保护：migrate_status=DOING 检测，强制重新搬移</li>
-            <li>OTA 状态 Flash 持久化：从 Backup SRAM 迁移到 ota_state 分区</li>
-            <li>定时属性上报，OTA 运行时自动暂停</li>
+            <li>MQTT/MQTTS 双模式连接，HMAC-SHA256 设备认证</li>
+            <li>定时属性上报，OTA 运行时自动暂停上报</li>
+            <li>HTTPS 分片下载，支持断点续传</li>
+            <li>智能 Flash 擦除策略，优化擦除时间</li>
             <li>CRC32 完整性校验 + 下载重试机制（最多 3 次）</li>
+            <li>OTA 状态持久化，断电恢复</li>
           </ul>
         </div>
         <div class="detail-section">
-
           <div class="detail-label">OTA 升级实测</div>
           <div class="img-carousel" id="ota-carousel">
             <div class="carousel-slide active">
@@ -1150,107 +1027,7 @@ body::before {
     </div>
   </div>
 
-  <!-- 卡片 2: 系统自愈与故障诊断 -->
-  <div class="project-card" onclick="toggleCard(this)">
-    <div class="card-header">
-      <div class="card-icon red">🛡</div>
-      <div class="card-info">
-        <div class="card-name">系统自愈与故障诊断</div>
-        <div class="card-tagline">syswatch · HardFault现场保存 · 复位事件上报 · 健康监控</div>
-        <div class="card-tags">
-          <span class="tag">syswatch</span>
-          <span class="tag">IWDG</span>
-          <span class="tag">Backup SRAM</span>
-          <span class="tag">MQTT上报</span>
-        </div>
-      </div>
-      <span class="card-arrow">›</span>
-    </div>
-    <div class="card-expand-hint">点击展开详情</div>
-    <div class="card-detail">
-      <div class="detail-inner">
-        <div class="detail-section">
-          <div class="detail-label">项目描述</div>
-          <p class="detail-text">系统自愈与故障诊断子系统。syswatch 监控所有线程调度，30秒无 idle 调度触发系统复位；HardFault 时保存完整现场到 Backup SRAM，重启后通过 MQTT 上报到华为云；复位事件（thread_stuck/stack_overflow/heap_exhausted/iwdg_timeout）自动上报。</p>
-        </div>
-        <div class="detail-section">
-          <div class="detail-label">核心特性</div>
-          <ul class="feature-list">
-            <li>syswatch 线程卡死自愈：30s 无 idle 调度 → 系统复位，IWDG 10s 硬件兜底</li>
-            <li>HardFault 现场保存：PC/LR/CFSR/BFAR/线程名 → Backup SRAM → MQTT 上报</li>
-            <li>复位事件上报：thread_stuck/stack_overflow/heap_exhausted/iwdg_timeout</li>
-            <li>健康检查：栈 >90% / 堆 <5KB / MQTT重连 >5次 → 告警上报</li>
-            <li>堆/栈保护：堆 <2KB / 栈 >95% → 主动复位 + 事件保存</li>
-            <li>执行轨迹记录：64 条函数调用轨迹，延迟死亡诊断</li>
-            <li>稳定性统计：uptime/启动次数/堆水位/MQTT重连次数/OTA失败/HardFault次数</li>
-            <li>Flash 日志存储：W25Q64 256KB 环形缓冲，LOG_E/LOG_W 自动拦截</li>
-          </ul>
-        </div>
-
-        <a class="gitee-btn" href="https://gitee.com/fszzh/huawei-cloud" target="_blank">
-          查看源码
-        </a>
-      </div>
-    </div>
-  </div>
-
-  <!-- 卡片 3: Bootloader OTA系统 -->
-  <div class="project-card" onclick="toggleCard(this)">
-    <div class="card-header">
-      <div class="card-icon amber">⚙</div>
-      <div class="card-info">
-        <div class="card-name">Bootloader OTA 系统</div>
-        <div class="card-tagline">QBoot独立化 · YModem升级 · 防降级 · 自动回滚</div>
-        <div class="card-tags">
-          <span class="tag">QBoot</span>
-          <span class="tag">YModem</span>
-          <span class="tag">CRC32</span>
-          <span class="tag">AES-256</span>
-        </div>
-      </div>
-      <span class="card-arrow">›</span>
-    </div>
-    <div class="card-expand-hint">点击展开详情</div>
-    <div class="card-detail">
-      <div class="detail-inner">
-        <div class="detail-section">
-          <div class="detail-label">项目描述</div>
-          <p class="detail-text">基于 QBoot V1.0.7 的 Bootloader，独立化修改脱离原包依赖。支持 YModem 串口升级和华为云 OTA 升级，具备防降级、自动回滚、搬移断电保护等功能。app 分区从 1024KB 扩大到 1536KB，用完 2MB 内部 Flash。</p>
-        </div>
-        <div class="detail-section">
-          <div class="detail-label">核心特性</div>
-          <ul class="feature-list">
-            <li>myqboot 独立化：从 qboot 包复制到 myapp/myqboot，脱离原包依赖</li>
-            <li>防降级：版本号比较，拒绝降级升级</li>
-            <li>自动回滚：boot_count > 3 从 factory 分区恢复</li>
-            <li>搬移断电保护：migrate_status=DOING 检测，force_migrate 强制搬移</li>
-            <li>OTA 状态 Flash 持久化：从 Backup SRAM 迁移到 ota_state 分区(4KB)</li>
-            <li>YModem 擦除修复：擦除整个分区，修复释放标志残留问题</li>
-            <li>app 分区扩大：1024KB → 1536KB，用完 2MB 内部 Flash</li>
-            <li>CRC32 完整性校验 + AES-256-CBC 解密 + quicklz 解压</li>
-          </ul>
-        </div>
-        <div class="detail-section">
-          <div class="detail-label">Flash 分区布局</div>
-          <ul class="feature-list">
-            <li>bootloader: 512KB (0x08000000-0x0807FFFF)</li>
-            <li>app: 1536KB (0x08080000-0x081FFFFF)</li>
-            <li>easyflash: 256KB (W25Q64 offset 0)</li>
-            <li>download: 3072KB (offset 256KB)</li>
-            <li>factory: 3072KB (offset 3328KB)</li>
-            <li>ota_state: 4KB (offset 6400KB)</li>
-            <li>log: 256KB (offset 6404KB)</li>
-          </ul>
-        </div>
-
-        <a class="gitee-btn" href="https://gitee.com/fszzh/huawei-cloud-bootloader" target="_blank">
-          查看源码
-        </a>
-      </div>
-    </div>
-  </div>
-
-  <!-- 卡片 4: LVGL 图形界面 -->
+  <!-- 卡片 2: LVGL 图形界面 -->
   <div class="project-card" onclick="toggleCard(this)">
     <div class="card-header">
       <div class="card-icon cyan">▣</div>
@@ -1298,7 +1075,8 @@ body::before {
     </div>
   </div>
 
-  <!-- 卡片 5: WiFi 通信 -->
+
+  <!-- 卡片 4: WiFi 通信 -->
   <div class="project-card" onclick="toggleCard(this)">
     <div class="card-header">
       <div class="card-icon green">📶</div>
@@ -1331,6 +1109,7 @@ body::before {
             <li>ping/ifconfig 等网络调试命令</li>
           </ul>
         </div>
+
         <a class="gitee-btn" href="https://gitee.com/fszzh/huawei-cloud" target="_blank">
           查看源码
         </a>
@@ -1338,7 +1117,7 @@ body::before {
     </div>
   </div>
 
-  <!-- 卡片 6: 存储与驱动 -->
+  <!-- 卡片 5: 存储与驱动 -->
   <div class="project-card" onclick="toggleCard(this)">
     <div class="card-header">
       <div class="card-icon purple">⚡</div>
@@ -1350,7 +1129,6 @@ body::before {
           <span class="tag">QSPI</span>
           <span class="tag">FAL</span>
           <span class="tag">MPU</span>
-          <span class="tag">EasyFlash</span>
         </div>
       </div>
       <span class="card-arrow">›</span>
@@ -1360,20 +1138,23 @@ body::before {
       <div class="detail-inner">
         <div class="detail-section">
           <div class="detail-label">项目描述</div>
-          <p class="detail-text">完整的存储管理与内存调度子系统。链接脚本定义 5 区域内存布局，MPU 配置 4 区域独立 Cache 策略，多 RAM 混合调度让每种内存各司其职。修复了 SDRAM 时序关键 Bug（RCDDelay 160ns→30ns，提升 5.3 倍随机访问速度）。EasyFlash 移植实现参数持久化存储。</p>
+          <p class="detail-text">完整的存储管理与内存调度子系统。链接脚本定义 5 区域内存布局，MPU 配置 4 区域独立 Cache 策略，多 RAM 混合调度让每种内存各司其职。修复了 SDRAM 时序关键 Bug（RCDDelay 160ns→30ns，提升 5.3 倍随机访问速度）。</p>
         </div>
         <div class="detail-section">
           <div class="detail-label">核心特性</div>
           <ul class="feature-list">
             <li>链接脚本 5 区域内存布局：ROM(1.5MB) / DTCM(128KB) / AXI(512KB) / SDRAM(32MB) / SRAM4(64KB)</li>
             <li>MPU 4 区域独立 Cache 策略：DTCM 零等待、AXI Write-Back、SRAM4 Non-Cacheable、SDRAM Write-Back</li>
-            <li>多 RAM 混合调度：DTCM 系统堆+栈 → AXI memheap 绑定 LVGL → SRAM4 固定块内存池供 DMA → SDRAM 帧缓冲</li>
+            <li>多 RAM 混合调度：DTCM 系统堆+栈 → AXI memheap 绑定 LVGL 内存池 → SRAM4 固定块内存池供 ESP-Hosted DMA → SDRAM 帧缓冲+JPEG 环形缓冲</li>
+            <li>AXI memheap locked=RT_TRUE，DTCM 满时 rt_malloc 自动回退到 AXI</li>
+            <li>SRAM4 rt_mp_t 固定块内存池，零碎片，spinlock 保护，ISR 安全</li>
             <li>D-Cache 一致性管理：DMA2D/MDMA/LTDC/JPEG 四路并发 Clean + Invalidate</li>
             <li>SDRAM 时序优化，RCDDelay 修复（5.3x 提升）</li>
-            <li>EasyFlash v4.1 移植：OTA 进度持久化、参数存储</li>
             <li>QBoot 释放标志预留 4KB，智能 Flash 擦除策略</li>
+            <li>LTDC 像素时钟优化至 40MHz</li>
           </ul>
         </div>
+
         <a class="gitee-btn" href="https://gitee.com/fszzh/huawei-cloud" target="_blank">
           查看源码
         </a>
@@ -1386,7 +1167,6 @@ body::before {
     <div class="contact-row">
       <a class="contact-btn" href="https://gitee.com/fszzh/huawei-cloud-bootloader" target="_blank" title="Bootloader 源码">Bootloader</a>
       <a class="contact-btn" href="https://gitee.com/fszzh/huawei-cloud" target="_blank" title="APP 源码">APP</a>
-
     </div>
     <p class="copy">扫描二维码查看项目源码与演示视频</p>
   </div>
