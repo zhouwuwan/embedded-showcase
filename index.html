@@ -781,7 +781,7 @@ body::before {
       </div>
     </div>
     <div class="overview-text" style="margin-top:10px;">
-      系统亮点：LTDC 行中断同步彻底消除屏幕撕裂；OTA 断点续传 + 防降级 + 自动回滚确保固件安全；syswatch 线程卡死自愈（30s 无 idle 调度触发复位，IWDG 10s 硬件兜底）；HardFault 现场保存到 Backup SRAM 并通过 MQTT 上报到华为云；复位事件（thread_stuck/stack_overflow/heap_exhausted）自动上报；<strong>4 区域 MPU Cache 策略</strong>（DTCM 零等待 / AXI Write-Back / SRAM4 Non-Cacheable / SDRAM Write-Back），D-Cache 一致性管理确保 DMA2D、MDMA、LTDC 并发无数据错乱；<strong>链接脚本 5 区域内存布局</strong>（ROM/DTCM/AXI/SDRAM/SRAM4），多 RAM 混合调度（AXI memheap 绑定 LVGL、SRAM4 固定块内存池供 DMA、SDRAM 帧缓冲、DTCM 系统堆+栈）。全栈从 CubeMX 引脚配置到应用层 UI 均独立完成。
+      系统亮点：<strong>LTDC 行中断同步</strong>彻底消除屏幕撕裂；<strong>OTA 断点续传 + 防降级 + 自动回滚</strong>确保固件安全；<strong>syswatch 线程卡死自愈</strong>（30s 无 idle 调度触发复位，IWDG 10s 硬件兜底）；<strong>HardFault 现场保存</strong>到 Backup SRAM 并通过 MQTT 上报到华为云；<strong>复位事件自动上报</strong>（thread_stuck/stack_overflow/heap_exhausted）；<strong>4 区域 MPU Cache 策略</strong>（DTCM 零等待 / AXI Write-Back / SRAM4 Non-Cacheable / SDRAM Write-Back），D-Cache 一致性管理确保 DMA2D、MDMA、LTDC 并发无数据错乱；<strong>链接脚本 5 区域内存布局</strong>（ROM/DTCM/AXI/SDRAM/SRAM4），多 RAM 混合调度（AXI memheap 绑定 LVGL、SRAM4 固定块内存池供 DMA、SDRAM 帧缓冲、DTCM 系统堆+栈）。从 CubeMX 引脚配置到应用层 UI 均独立完成。
     </div>
   </div>
 
