@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>@ - 工业六轴机械臂 3D 示教器</title>
+<style>
+:root {
+  --bg: #0a0e1a;
+  --bg-card: #131a2b;
+  --bg-card-hover: #1a2340;
+  --border: #1e293b;
+  --border-active: #06b6d4;
+  --text: #f1f5f9;
+  --text-dim: #64748b;
+  --text-mid: #94a3b8;
+  --accent: #06b6d4;
+  --accent-2: #3b82f6;
+  --warn: #f59e0b;
+  --success: #10b981;
+  --danger: #ef4444;
+  --radius: 14px;
+  --shadow: 0 4px 24px rgba(0,0,0,0.4);
+}
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 20% 50%, rgba(6,182,212,0.06) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(59,130,246,0.05) 0%, transparent 50%),
+    linear-gradient(rgba(30,41,59,0.3) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(30,41,59,0.3) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+.container { max-width: 640px; margin: 0 auto; padding: 0 16px; position: relative; z-index: 1; }
+
+.header { padding: 40px 0 28px; text-align: center; }
+.header .avatar {
+  width: 72px; height: 72px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 16px; font-size: 28px; font-weight: 700; color: #fff;
+  box-shadow: 0 0 24px rgba(6,182,212,0.3);
+}
+.header h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+.header .title {
+  display: inline-block; font-size: 13px; color: var(--accent);
+  background: rgba(6,182,212,0.1); border: 1px solid rgba(6,182,212,0.3);
+  padding: 3px 12px; border-radius: 20px; margin-bottom: 10px;
+}
+.header .bio { font-size: 14px; color: var(--text-mid); max-width: 380px; margin: 0 auto; }
+
+.stats { display: flex; justify-content: center; gap: 24px; padding: 16px 0; margin-bottom: 8px; }
+.stat-item { text-align: center; }
+.stat-item .num { font-size: 24px; font-weight: 700; color: var(--accent); font-family: "SF Mono", "Fira Code", monospace; }
+.stat-item .label { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
+
+.section-title {
+  font-size: 13px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 2px;
+  margin: 24px 0 14px; display: flex; align-items: center; gap: 8px;
+}
+.section-title::before { content: ''; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+
+.overview { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; margin-bottom: 20px; }
+.overview-text { font-size: 13px; color: var(--text-mid); line-height: 1.8; }
+.overview-text strong { color: var(--text); }
+
+.highlight-row { display: flex; justify-content: space-between; gap: 8px; margin: 16px 0 6px; }
+.highlight-item { flex: 1; text-align: center; background: rgba(6,182,212,0.06); border: 1px solid rgba(6,182,212,0.15); border-radius: 10px; padding: 12px 6px; }
+.highlight-num { font-size: 20px; font-weight: 700; color: var(--accent); font-family: "SF Mono", "Fira Code", monospace; margin-bottom: 4px; }
+.highlight-label { font-size: 10px; color: var(--text-dim); line-height: 1.4; }
+.highlight-sub { color: var(--text-dim); opacity: 0.7; }
+
+.tech-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; }
+.tech-item { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 12px; text-align: center; }
+.tech-item .tech-name { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+.tech-item .tech-ver { font-size: 10px; color: var(--text-dim); font-family: "SF Mono", monospace; }
+
+.arch-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; margin-bottom: 20px; }
+.arch-diagram { font-family: "SF Mono", "Fira Code", monospace; font-size: 11px; color: var(--text-mid); line-height: 1.8; white-space: pre; overflow-x: auto; }
+
+.feature-list { list-style: none; }
+.feature-list li { font-size: 13px; color: var(--text-mid); padding: 5px 0; padding-left: 18px; position: relative; }
+.feature-list li::before { content: '▸'; position: absolute; left: 0; color: var(--accent); }
+.feature-list li.success::before { content: '✓'; color: var(--success); }
+
+.func-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 14px; overflow: hidden; }
+.func-header { padding: 14px 18px; display: flex; align-items: center; gap: 12px; }
+.func-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+.func-icon.cyan { background: rgba(6,182,212,0.15); color: #22d3ee; }
+.func-icon.blue { background: rgba(59,130,246,0.15); color: #60a5fa; }
+.func-icon.amber { background: rgba(245,158,11,0.15); color: #fbbf24; }
+.func-icon.green { background: rgba(16,185,129,0.15); color: #34d399; }
+.func-name { font-size: 14px; font-weight: 600; }
+.func-desc { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+.func-detail { padding: 0 18px 14px; font-size: 12px; color: var(--text-mid); line-height: 1.7; }
+
+.pit-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; margin-bottom: 14px; }
+.pit-title { font-size: 13px; font-weight: 600; margin-bottom: 8px; color: var(--warn); }
+.pit-list { list-style: none; }
+.pit-list li { font-size: 12px; color: var(--text-mid); padding: 4px 0; padding-left: 16px; position: relative; }
+.pit-list li::before { content: '⚠'; position: absolute; left: 0; color: var(--warn); font-size: 10px; }
+
+.demo-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 20px; overflow: hidden; }
+.demo-card video { width: 100%; display: block; background: #000; }
+.demo-caption { padding: 10px 18px 14px; font-size: 12px; color: var(--text-dim); text-align: center; }
+.demo-caption strong { color: var(--accent); }
+
+.footer { text-align: center; padding: 30px 0 40px; border-top: 1px solid var(--border); margin-top: 20px; }
+.footer .copy { font-size: 11px; color: var(--text-dim); }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+.overview, .tech-grid, .arch-card, .func-card, .pit-card { animation: fadeUp 0.4s ease backwards; }
+.overview { animation-delay: 0.05s; }
+.arch-card { animation-delay: 0.1s; }
+
+@media (min-width: 768px) { .container { max-width: 720px; padding: 0 24px; } .header h1 { font-size: 28px; } }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="avatar">🤖</div>
+    <h1>工业六轴机械臂 3D 示教器</h1>
+    <div class="title">Qt + ROS2 Jazzy · MoveIt2 · RViz2 嵌入 · MoveGroupInterface</div>
+    <p class="bio">Qt 控制面板嵌入 RViz2 3D 渲染，通过 MoveGroupInterface 实现轴动/线动/Home 三种运动模式，MoveIt2 自动完成逆运动学求解与无碰撞轨迹规划</p>
+  </div>
+
+  <div class="stats">
+    <div class="stat-item"><div class="num">6</div><div class="label">运动轴</div></div>
+    <div class="stat-item"><div class="num">3</div><div class="label">运动模式</div></div>
+    <div class="stat-item"><div class="num">17</div><div class="label">踩坑解决</div></div>
+  </div>
+
+  <div class="section-title">效果演示</div>
+  <div class="demo-card">
+    <video controls autoplay muted loop playsinline>
+      <source src="images/robotarm_demo.mp4" type="video/mp4">
+      您的浏览器不支持视频播放。
+    </video>
+    <div class="demo-caption"><strong>线动演示</strong> · 末端位姿目标 → MoveIt2 IK 求解 + 轨迹规划 → 机械臂执行</div>
+  </div>
+
+  <div class="section-title">项目概述</div>
+  <div class="overview">
+    <div class="overview-text">
+      仿真实工业六轴机械臂的 <strong>3D 示教器</strong>，Qt 窗口左侧嵌入 <strong>RViz2 VisualizationFrame</strong> 实时渲染机械臂 3D 模型（Grid + RobotModel + MotionPlanning），右侧控制面板实现<strong>轴动</strong>（滑块设 6 关节角）、<strong>线动</strong>（末端 xyzrpy 位姿目标）、<strong>Home</strong>（回初始位置）三种运动模式。通过 <strong>MoveGroupInterface</strong> 下发规划目标，MoveIt2 自动完成 <strong>逆运动学（IK）求解 + 无碰撞轨迹规划 + 关节限位避让</strong>。<strong>tf2_ros</strong> 实时查询末端位姿同步到 UI，<strong>QThread</strong> 子线程处理 ROS2 回调避免阻塞 Qt 事件循环。
+    </div>
+    <div class="highlight-row">
+      <div class="highlight-item">
+        <div class="highlight-num">1280×720</div>
+        <div class="highlight-label">窗口分辨率<br><span class="highlight-sub">左 RViz2 + 右控制面板</span></div>
+      </div>
+      <div class="highlight-item">
+        <div class="highlight-num">3终端</div>
+        <div class="highlight-label">运行架构<br><span class="highlight-sub">UR5e + MoveIt2 + tp_ui</span></div>
+      </div>
+      <div class="highlight-item">
+        <div class="highlight-num">500ms</div>
+        <div class="highlight-label">位姿同步<br><span class="highlight-sub">TF lookupTransform</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">系统架构</div>
+  <div class="arch-card">
+    <div class="arch-diagram">┌──────────────────────┬──────────────────┐
+│                      │  使能/急停/速度    │
+│   RViz2 3D 视图       │  关节角 J1~J6     │
+│  (VisualizationFrame) │  轴动/线动 Tab   │
+│   Grid + RobotModel   │  Home/记录/回放   │
+│   + MotionPlanning    │  状态/点位表      │
+└──────────────────────┴──────────────────┘
+         ←信号槽→  [RosBridge(QThread)]
+    ←话题/TF/MoveGroup→  [MoveIt2 + UR5e]</div>
+  </div>
+
+  <div class="section-title">技术栈</div>
+  <div class="tech-grid">
+    <div class="tech-item"><div class="tech-name">Qt5 Widgets</div><div class="tech-ver">QSplitter + QTabWidget</div></div>
+    <div class="tech-item"><div class="tech-name">ROS2 Jazzy</div><div class="tech-ver">rclcpp + colcon</div></div>
+    <div class="tech-item"><div class="tech-name">MoveIt2</div><div class="tech-ver">IK + 轨迹规划</div></div>
+    <div class="tech-item"><div class="tech-name">RViz2 嵌入</div><div class="tech-ver">VisualizationFrame</div></div>
+    <div class="tech-item"><div class="tech-name">MoveGroupInterface</div><div class="tech-ver">关节/位姿目标</div></div>
+    <div class="tech-item"><div class="tech-name">tf2_ros</div><div class="tech-ver">TF Listener 末端位姿</div></div>
+    <div class="tech-item"><div class="tech-name">UR5e</div><div class="tech-ver">6轴工业机械臂 mock</div></div>
+    <div class="tech-item"><div class="tech-name">URDF</div><div class="tech-ver">XML 机械臂模型</div></div>
+    <div class="tech-item"><div class="tech-name">QThread</div><div class="tech-ver">ROS2 回调子线程</div></div>
+    <div class="tech-item"><div class="tech-name">std::atomic</div><div class="tech-ver">move() 互斥锁</div></div>
+    <div class="tech-item"><div class="tech-name">ament_cmake</div><div class="tech-ver">ROS2 包构建</div></div>
+    <div class="tech-item"><div class="tech-name">QoS best_effort</div><div class="tech-ver">VMware 兼容</div></div>
+  </div>
+
+  <div class="section-title">功能模块</div>
+
+  <div class="func-card">
+    <div class="func-header">
+      <div class="func-icon cyan">📐</div>
+      <div><div class="func-name">轴动（关节空间控制）</div><div class="func-desc">6 个滑块设 J1~J6 关节角 → MoveGroupInterface::setJointValueTarget + plan + execute</div></div>
+    </div>
+    <div class="func-detail">滑块范围 ±180°，点击"轴动执行"下发 6 关节目标（弧度），MoveIt2 在关节空间规划无碰撞轨迹并执行。开机自动校准滑块到当前关节角。</div>
+  </div>
+
+  <div class="func-card">
+    <div class="func-header">
+      <div class="func-icon blue">📏</div>
+      <div><div class="func-name">线动（笛卡尔空间控制）</div><div class="func-desc">末端 xyz/roll/pitch/yaw → setPoseTarget + plan/move</div></div>
+    </div>
+    <div class="func-detail">6 个输入框设末端位姿，"线动规划"只 plan 在 RViz2 预览轨迹（不驱动机械臂），"线动执行"plan + execute 真正运动。MoveIt2 自动算 IK 解关节角。500ms 定时器通过 TF 实时同步末端位姿到输入框，用户编辑时自动暂停同步。</div>
+  </div>
+
+  <div class="func-card">
+    <div class="func-header">
+      <div class="func-icon amber">🏠</div>
+      <div><div class="func-name">Home（回初始位置）</div><div class="func-desc">记录开机关节角 → sendJointGoal</div></div>
+    </div>
+    <div class="func-detail">开机时记录机械臂初始关节角到 m_initialJoints，Home 按钮发该目标（非硬编码 home 姿态），确保回到实际开机位置。</div>
+  </div>
+
+  <div class="func-card">
+    <div class="func-header">
+      <div class="func-icon green">🔄</div>
+      <div><div class="func-name">实时显示 + 开机校准</div><div class="func-desc">订阅 /joint_states → LCD 显示 + 滑块同步</div></div>
+    </div>
+    <div class="func-detail">QoS best_effort 订阅 /joint_states，按 UR5e 关节名（shoulder_pan_joint 等）匹配，弧度转角度显示。首次收到数据时同步滑块和线动输入框到当前姿态。</div>
+  </div>
+
+  <div class="section-title">关键技术点</div>
+  <div class="overview">
+    <ul class="feature-list">
+      <li class="success"><strong>RViz2 嵌入 Qt</strong>：VisualizationFrame + RosNodeAbstraction 传入构造和 initialize，代码动态添加 4 个 display</li>
+      <li class="success"><strong>双 Node 分工</strong>：node_ 订阅 /joint_states + TF（rclcpp::spin 驱动）；move_node_ 给 MoveGroupInterface（move() 内部自 spin）</li>
+      <li class="success"><strong>TF 查末端位姿</strong>：tf_buffer_->lookupTransform("base_link", "tool0") 替代 move_group_->getCurrentPose()（后者需 move_node_ 被 spin）</li>
+      <li class="success"><strong>互斥锁防死锁</strong>：std::atomic&lt;bool&gt; move_in_progress_ 防并发 move()（MoveGroupInterface 非线程安全）</li>
+      <li class="success"><strong>跨线程信号槽</strong>：qRegisterMetaType&lt;QVector&lt;double&gt;&gt; 注册元类型，QThread 子线程 emit 信号主线程槽函数</li>
+      <li class="success"><strong>析构顺序保证</strong>：delete MainWindow（含 rviz）在 rclcpp::shutdown 之前，避免访问已关闭 ROS2</li>
+    </ul>
+  </div>
+
+  <div class="section-title">踩坑记录（17 个）</div>
+  <div class="pit-card">
+    <div class="pit-title">订阅 /joint_states 阶段</div>
+    <ul class="pit-list">
+      <li>CMakeLists 缺 install(TARGETS) → 编译成功但运行旧代码</li>
+      <li>缺 set(CMAKE_AUTOMOC ON) → undefined reference to vtable</li>
+      <li>缺 qRegisterMetaType → 信号被静默丢弃</li>
+      <li>默认 RELIABLE QoS → VMware 收不到数据，改 best_effort</li>
+      <li>关节名没匹配 UR5e → 显示错关节</li>
+      <li>DDS 多播延迟 → FASTDDS_LOCALHOST_EXECUTION=1</li>
+    </ul>
+  </div>
+  <div class="pit-card">
+    <div class="pit-title">MoveIt2 集成阶段</div>
+    <ul class="pit-list">
+      <li>CMake target 名少了 moveit_ 前缀</li>
+      <li>moveit::core::MoveResult 在 Jazzy 中不存在</li>
+      <li>plan() 需要传 Plan 参数</li>
+      <li>getCurrentPose() 返回全 0 → 改用 TF lookupTransform</li>
+      <li>并发 move() 死锁 → std::atomic 互斥</li>
+      <li>线动输入框被定时器覆盖 → m_poseEditing 标志</li>
+    </ul>
+  </div>
+  <div class="pit-card">
+    <div class="pit-title">RViz2 嵌入阶段</div>
+    <ul class="pit-list">
+      <li>Qt5/Qt6 冲突 → rviz 依赖 Qt5，改用 Qt5::Widgets</li>
+      <li>VisualizationFrame 构造需 RosNodeAbstraction 第一参数</li>
+      <li>initialize() 需两个参数，无零参重载</li>
+      <li>设置 display 属性抛异常 → 用默认值</li>
+      <li>Node already added to executor → rviz 内部自 spin</li>
+    </ul>
+  </div>
+
+  <div class="section-title">运行架构</div>
+  <div class="overview">
+    <div class="overview-text">
+      <strong>终端1</strong>：UR5e 控制器（mock hardware，不需真实机器人）<br>
+      <strong>终端2</strong>：MoveIt2（launch_rviz:=false，RViz2 已嵌入 tp_ui）<br>
+      <strong>终端3</strong>：tp_ui 3D 示教器<br><br>
+      <strong>板端部署</strong>（S5P6818）：板端只跑 tp_ui（1 个终端），ROS2/MoveIt2 留电脑端（2 个终端），DDS 跨网络自动发现。
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="copy">Qt + ROS2 Jazzy + MoveIt2 + RViz2 · 2026</div>
+  </div>
+
+</div>
+</body>
+</html>
