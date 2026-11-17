@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>@ - 巡逻机器人系统 · Qt 上位机</title>
+<style>
+:root {
+  --bg: #0a0e1a;
+  --bg-card: #131a2b;
+  --bg-card-hover: #1a2340;
+  --border: #1e293b;
+  --border-active: #06b6d4;
+  --text: #f1f5f9;
+  --text-dim: #64748b;
+  --text-mid: #94a3b8;
+  --accent: #06b6d4;
+  --accent-2: #3b82f6;
+  --warn: #f59e0b;
+  --success: #10b981;
+  --danger: #ef4444;
+  --radius: 14px;
+  --shadow: 0 4px 24px rgba(0,0,0,0.4);
+}
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 20% 50%, rgba(6,182,212,0.06) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(59,130,246,0.05) 0%, transparent 50%),
+    linear-gradient(rgba(30,41,59,0.3) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(30,41,59,0.3) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+.container { max-width: 640px; margin: 0 auto; padding: 0 16px; position: relative; z-index: 1; }
+
+.header { padding: 40px 0 28px; text-align: center; }
+.header .avatar {
+  width: 72px; height: 72px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 16px; font-size: 28px; font-weight: 700; color: #fff;
+  box-shadow: 0 0 24px rgba(6,182,212,0.3);
+}
+.header h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+.header .title {
+  display: inline-block; font-size: 13px; color: var(--accent);
+  background: rgba(6,182,212,0.1); border: 1px solid rgba(6,182,212,0.3);
+  padding: 3px 12px; border-radius: 20px; margin-bottom: 10px;
+}
+.header .bio { font-size: 14px; color: var(--text-mid); max-width: 380px; margin: 0 auto; }
+
+.stats { display: flex; justify-content: center; gap: 24px; padding: 16px 0; margin-bottom: 8px; }
+.stat-item { text-align: center; }
+.stat-item .num { font-size: 24px; font-weight: 700; color: var(--accent); font-family: "SF Mono", "Fira Code", monospace; }
+.stat-item .label { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
+
+.section-title {
+  font-size: 13px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 2px;
+  margin: 24px 0 14px; display: flex; align-items: center; gap: 8px;
+}
+.section-title::before { content: ''; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+
+.overview { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; margin-bottom: 20px; }
+.overview-text { font-size: 13px; color: var(--text-mid); line-height: 1.8; }
+.overview-text strong { color: var(--text); }
+
+.highlight-row { display: flex; justify-content: space-between; gap: 8px; margin: 16px 0 6px; }
+.highlight-item { flex: 1; text-align: center; background: rgba(6,182,212,0.06); border: 1px solid rgba(6,182,212,0.15); border-radius: 10px; padding: 12px 6px; }
+.highlight-num { font-size: 20px; font-weight: 700; color: var(--accent); font-family: "SF Mono", "Fira Code", monospace; margin-bottom: 4px; }
+.highlight-label { font-size: 10px; color: var(--text-dim); line-height: 1.4; }
+.highlight-sub { color: var(--text-dim); opacity: 0.7; }
+
+.tech-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; }
+.tech-item { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 12px; text-align: center; }
+.tech-item .tech-name { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+.tech-item .tech-ver { font-size: 10px; color: var(--text-dim); font-family: "SF Mono", monospace; }
+
+.arch-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; margin-bottom: 20px; }
+.arch-diagram { font-family: "SF Mono", "Fira Code", monospace; font-size: 11px; color: var(--text-mid); line-height: 1.8; white-space: pre; overflow-x: auto; }
+
+.feature-list { list-style: none; }
+.feature-list li { font-size: 13px; color: var(--text-mid); padding: 5px 0; padding-left: 18px; position: relative; }
+.feature-list li::before { content: '▸'; position: absolute; left: 0; color: var(--accent); }
+.feature-list li.success::before { content: '✓'; color: var(--success); }
+
+.func-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 14px; overflow: hidden; }
+.func-header { padding: 14px 18px; display: flex; align-items: center; gap: 12px; }
+.func-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+.func-icon.cyan { background: rgba(6,182,212,0.15); color: #22d3ee; }
+.func-icon.blue { background: rgba(59,130,246,0.15); color: #60a5fa; }
+.func-icon.amber { background: rgba(245,158,11,0.15); color: #fbbf24; }
+.func-icon.green { background: rgba(16,185,129,0.15); color: #34d399; }
+.func-icon.red { background: rgba(239,68,68,0.15); color: #f87171; }
+.func-name { font-size: 14px; font-weight: 600; }
+.func-desc { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+.func-detail { padding: 0 18px 14px; font-size: 12px; color: var(--text-mid); line-height: 1.7; }
+
+.msg-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 14px; overflow: hidden; }
+.msg-header { padding: 12px 18px; display: flex; align-items: center; gap: 10px; }
+.msg-tag { font-size: 10px; font-family: "SF Mono", monospace; padding: 2px 8px; border-radius: 6px; flex-shrink: 0; }
+.msg-tag.action { background: rgba(6,182,212,0.15); color: #22d3ee; }
+.msg-tag.msg { background: rgba(59,130,246,0.15); color: #60a5fa; }
+.msg-tag.srv { background: rgba(16,185,129,0.15); color: #34d399; }
+.msg-name { font-size: 13px; font-weight: 600; }
+.msg-def { font-family: "SF Mono", "Fira Code", monospace; font-size: 11px; color: var(--text-mid); line-height: 1.7; padding: 0 18px 12px; white-space: pre; overflow-x: auto; }
+
+.demo-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 20px; overflow: hidden; }
+.demo-card img { width: 100%; display: block; background: #fff; }
+.demo-caption { padding: 10px 18px 14px; font-size: 12px; color: var(--text-dim); text-align: center; }
+.demo-caption strong { color: var(--accent); }
+
+.footer { text-align: center; padding: 30px 0 40px; border-top: 1px solid var(--border); margin-top: 20px; }
+.footer .copy { font-size: 11px; color: var(--text-dim); }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+.overview, .tech-grid, .arch-card, .func-card, .msg-card { animation: fadeUp 0.4s ease backwards; }
+.overview { animation-delay: 0.05s; }
+.arch-card { animation-delay: 0.1s; }
+
+@media (min-width: 768px) { .container { max-width: 720px; padding: 0 24px; } .header h1 { font-size: 28px; } }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="avatar">🚔</div>
+    <h1>巡逻机器人系统 · Qt 上位机</h1>
+    <div class="title">ROS2 Jazzy · rclcpp_action · Qt5 QThread · 三类通信全覆盖</div>
+    <p class="bio">5 个 ROS2 节点 + Qt 控制台：动作服务端逐点导航、调度控制器链式调度与低电量自动返航、Qt 界面路径编辑与地图实时绘制</p>
+  </div>
+
+  <div class="stats">
+    <div class="stat-item"><div class="num">5</div><div class="label">ROS2 节点</div></div>
+    <div class="stat-item"><div class="num">6</div><div class="label">自定义接口</div></div>
+    <div class="stat-item"><div class="num">3</div><div class="label">通信类型</div></div>
+  </div>
+
+  <div class="section-title">效果演示</div>
+  <div class="demo-card">
+    <img src="images/patrol_gui_demo.png" alt="Qt 巡逻控制台运行截图">
+    <div class="demo-caption"><strong>一次完整巡逻任务收尾</strong> · 5 个路径点全部到达（进度 5/5，状态 idle）· 地图实时绘制路径连线与机器人位置，电池 90%</div>
+  </div>
+
+  <div class="section-title">项目概述</div>
+  <div class="overview">
+    <div class="overview-text">
+      一套完整的巡逻机器人控制系统：<strong>5 个 ROS2 节点</strong>各司其职——传感器模拟、动作服务端（逐点导航 + 实时反馈）、调度控制器（多目标链式调度）、命令服务层、状态监控，外加一个 <strong>Qt 控制台</strong>实现路径编辑、巡逻启动/急停、电池/进度/位置实时显示与巡逻地图绘制。项目覆盖 ROS2 三类通信（<strong>话题 / 服务 / 动作</strong>）的完整工程实践，自定义 6 个接口定义文件，界面与逻辑通过 <strong>QThread + 信号槽</strong>双线程模型解耦。
+    </div>
+    <div class="highlight-row">
+      <div class="highlight-item">
+        <div class="highlight-num">5+1</div>
+        <div class="highlight-label">节点+界面<br><span class="highlight-sub">单一职责拆分</span></div>
+      </div>
+      <div class="highlight-item">
+        <div class="highlight-num">&lt;20%</div>
+        <div class="highlight-label">低电量返航<br><span class="highlight-sub">取消目标回原点</span></div>
+      </div>
+      <div class="highlight-item">
+        <div class="highlight-num">0阻塞</div>
+        <div class="highlight-label">UI 线程<br><span class="highlight-sub">异步服务调用</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">系统架构</div>
+  <div class="arch-card">
+    <div class="arch-diagram"> [sensor_node]──battery/imu──►┐
+ [command_service]            │
+   ├─ /set_path  ─►patrol_path─┤
+   ├─ /emergency_stop ─►flag───┤    [patrol_controller]
+   └─ /get_status              ├──链式调度──► /patrol ──► [patrol_action_server]
+                               ├──patrol_status─►┐   └─feedback→odom(Pose2D)
+ [status_monitor]◄─聚合────────┘                 │
+                                          [Qt patrol_gui]
+                                    RosThread(QThread) ⇄信号槽⇄ PatrolGui
+                                    订 battery/status/odom · 调 3 服务</div>
+  </div>
+
+  <div class="section-title">自定义接口（6 个）</div>
+
+  <div class="msg-card">
+    <div class="msg-header">
+      <div class="msg-tag action">Action</div>
+      <div class="msg-name">Patrol.action · 单点导航</div>
+    </div>
+    <div class="msg-def"># Goal → Result
+float64 x              # 目标点X坐标（米）
+float64 y              # 目标点Y坐标（米）
+---
+bool arrived           # 是否到达
+string message         # 结果描述
+---
+# Feedback
+float64 current_x      # 当前位置
+float64 current_y
+float64 distance       # 剩余距离</div>
+  </div>
+
+  <div class="msg-card">
+    <div class="msg-header">
+      <div class="msg-tag srv">Service ×3</div>
+      <div class="msg-name">SetPath / EmergencyStop / GetStatus</div>
+    </div>
+    <div class="msg-def">SetPath:        x_points[] + y_points[] → success + message
+EmergencyStop:  （无请求）               → success + message
+GetStatus:      （无请求）               → battery + state + current_point</div>
+  </div>
+
+  <div class="msg-card">
+    <div class="msg-header">
+      <div class="msg-tag msg">Msg ×2</div>
+      <div class="msg-name">PatrolStatus / PatrolPath</div>
+    </div>
+    <div class="msg-def">PatrolStatus:  current_point + total_points + state
+               （state: patrolling/idle/returning/emergency_stop）
+PatrolPath:    x_points[] + y_points[]（服务层→调度层解耦）</div>
+  </div>
+
+  <div class="section-title">功能模块</div>
+
+  <div class="func-card">
+    <div class="func-header">
+      <div class="func-icon cyan">🎯</div>
+      <div><div class="func-name">动作服务端（patrol_action_server）</div><div class="func-desc">rclcpp_action 三回调 + 独立线程执行 + 实时反馈</div></div>
+    </div>
+    <div class="func-detail">HandleGoal 无条件接受目标，HandleAccepted 在独立线程模拟逐点移动（速度积分推进），按固定频率发布 Feedback（当前位置 + 剩余距离）并同步发布 /odom（Pose2D）供界面绘制；HandleCancel 支持中途取消（低电量返航/急停联动依赖此能力）。</div>
+  </div>
+
+  <div class="func-card">
+    <div class="func-header">
+      <div class="func-icon green">🧠</div>
+      <div><div class="func-name">调度控制器（patrol_controller）</div><div class="func-desc">动作结果回调链式调度 · 多目标自动推进</div></div>
+    </div>
+    <div class="func-detail">收到路径后逐点下发 Patrol 目标；<strong>result 回调里链式调用 SendNextGoal()</strong>——SUCCEEDED 则推进序号继续，CANCELED 则停止，全程无需轮询。goal_response 回调保存 goal_handle 供取消，feedback 回调同步 PatrolStatus 话题。</div>
+  </div>
+
+  <div class="func-card">
+    <div class="func-header">
+      <div class="func-icon amber">🔋</div>
+      <div><div class="func-name">低电量自动返航 + 急停联动</div><div class="func-desc">订阅 battery → 取消当前目标 → 回原点 (0,0)</div></div>
+    </div>
+    <div class="func-detail">电量 &lt;20% 且巡逻中：async_cancel_goal 取消当前动作，状态切 returning，自动下发回原点目标，返航完成回 idle——三级状态流转全部事件驱动。急停（emergency_stop_flag）同样走"取消 + 状态切换"路径，且返航途中急停可随时打断。</div>
+  </div>
+
+  <div class="func-card">
+    <div class="func-header">
+      <div class="func-icon blue">🖥️</div>
+      <div><div class="func-name">Qt 控制台（patrol_gui + ros_thread）</div><div class="func-desc">QThread 双线程模型 · 跨线程信号槽 · 异步服务</div></div>
+    </div>
+    <div class="func-detail"><strong>RosThread(QThread)</strong> 独立跑 rclcpp::spin，3 个订阅收到数据即 emit 信号（BatteryUpdated/StatusUpdated/OdomUpdated），Qt 主线程槽函数安全更新界面；3 个服务客户端用 <strong>async_send_request + lambda 回调</strong>异步调用（带 2s 超时探测），全程不阻塞事件循环；析构 quit() + wait() 保证 ROS2 线程先于 context 关闭。</div>
+  </div>
+
+  <div class="func-card">
+    <div class="func-header">
+      <div class="func-icon red">🗺️</div>
+      <div><div class="func-name">巡逻地图（paintEvent 自绘）</div><div class="func-desc">坐标轴 + 路径点 + 连线 + 机器人实时位置</div></div>
+    </div>
+    <div class="func-detail">QPainter 反走样绘制：灰色虚线坐标轴、蓝色圆点路径（序号标注）、绿色虚线连线、红色实心圆为机器人当前位置（/odom 驱动，每次到达触发 update() 重绘）。坐标换算含 <strong>30px/m 比例缩放 + Y 轴翻转</strong>（屏幕 Y 向下与地图 Y 向上的手眼校正）。</div>
+  </div>
+
+  <div class="func-card">
+    <div class="func-header">
+      <div class="func-icon green">📋</div>
+      <div><div class="func-name">路径编辑表格 + 命令服务层</div><div class="func-desc">QTableWidget 增删改 → /set_path 下发</div></div>
+    </div>
+    <div class="func-detail">QTableWidget 四列（序号只读 / X 可编辑 / Y 可编辑 / 行内删除按钮），增删后自动同步成员变量；command_service 节点收 SetPath 后发布 patrol_path 话题给调度层——<strong>服务层（请求-响应）与调度层（话题驱动）解耦</strong>，状态查询 GetStatus 聚合电池/状态/进度一次返回。</div>
+  </div>
+
+  <div class="section-title">关键技术点</div>
+  <div class="overview">
+    <ul class="feature-list">
+      <li class="success"><strong>双线程模型</strong>：Qt 主线程只跑界面事件循环，RosThread(QThread) 子线程独立 rclcpp::spin——ROS2 回调永不阻塞 UI</li>
+      <li class="success"><strong>跨线程信号槽</strong>：子线程 emit → 主线程槽（Qt 自动排队连接），ROS2 数据安全抵达界面层</li>
+      <li class="success"><strong>异步服务调用</strong>：async_send_request + SharedFuture lambda 回调，2s wait_for_service 超时探测，UI 零卡顿</li>
+      <li class="success"><strong>动作三回调全用上</strong>：goal_response（存 handle 供取消）/ feedback（同步状态）/ result（链式推进）</li>
+      <li class="success"><strong>三类通信各司其职</strong>：话题（状态流）、服务（命令+查询）、动作（长时导航任务）——按语义选通信类型</li>
+      <li class="success"><strong>类与入口解耦</strong>：每节点 header/cpp/main 三件套，类可被其他节点复用（工程化组织）</li>
+      <li class="success"><strong>接口自定义 6 个</strong>：1 action + 2 msg + 3 srv，全部 rosidl 生成 + CMake rosidl_get_typesupport_target 接入</li>
+      <li class="success"><strong>线程生命周期</strong>：析构 quit()+wait() 保证 ROS2 线程先退，unique_ptr 全程管理无裸 delete</li>
+    </ul>
+  </div>
+
+  <div class="section-title">运行架构</div>
+  <div class="overview">
+    <div class="overview-text">
+      6 个组件各自独立进程，任何 ROS2 环境可跑（Jazzy 验证）：<br>
+      <strong>终端1</strong> sensor_node（模拟电池/IMU）&nbsp;·&nbsp; <strong>终端2</strong> command_service（命令入口）<br>
+      <strong>终端3</strong> patrol_action_server（动作服务端）&nbsp;·&nbsp; <strong>终端4</strong> patrol_controller（调度核心）<br>
+      <strong>终端5</strong> status_monitor（状态聚合）&nbsp;·&nbsp; <strong>终端6</strong> patrol_gui（Qt 控制台）<br><br>
+      演进路线：调度层目标点位可对接 Nav2 NavigateToPose 动作，从"模拟移动"升级为真实机器人导航（接口不变，只换动作服务端）。
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="copy">ROS2 Jazzy + Qt5 · 话题/服务/动作三类通信全实践 · 2026</div>
+  </div>
+
+</div>
+</body>
+</html>
