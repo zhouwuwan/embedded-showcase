@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>@ - 传感器融合仿真与轨迹定位</title>
+<style>
+:root {
+  --bg: #0a0e1a;
+  --bg-card: #131a2b;
+  --bg-card-hover: #1a2340;
+  --border: #1e293b;
+  --border-active: #06b6d4;
+  --text: #f1f5f9;
+  --text-dim: #64748b;
+  --text-mid: #94a3b8;
+  --accent: #06b6d4;
+  --accent-2: #3b82f6;
+  --warn: #f59e0b;
+  --success: #10b981;
+  --danger: #ef4444;
+  --radius: 14px;
+  --shadow: 0 4px 24px rgba(0,0,0,0.4);
+}
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 20% 50%, rgba(6,182,212,0.06) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(59,130,246,0.05) 0%, transparent 50%),
+    linear-gradient(rgba(30,41,59,0.3) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(30,41,59,0.3) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+.container { max-width: 640px; margin: 0 auto; padding: 0 16px; position: relative; z-index: 1; }
+
+.header { padding: 40px 0 28px; text-align: center; }
+.header .avatar {
+  width: 72px; height: 72px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 16px; font-size: 28px; font-weight: 700; color: #fff;
+  box-shadow: 0 0 24px rgba(6,182,212,0.3);
+}
+.header h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+.header .title {
+  display: inline-block; font-size: 13px; color: var(--accent);
+  background: rgba(6,182,212,0.1); border: 1px solid rgba(6,182,212,0.3);
+  padding: 3px 12px; border-radius: 20px; margin-bottom: 10px;
+}
+.header .bio { font-size: 14px; color: var(--text-mid); max-width: 380px; margin: 0 auto; }
+
+.stats { display: flex; justify-content: center; gap: 24px; padding: 16px 0; margin-bottom: 8px; }
+.stat-item { text-align: center; }
+.stat-item .num { font-size: 24px; font-weight: 700; color: var(--accent); font-family: "SF Mono", "Fira Code", monospace; }
+.stat-item .label { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
+
+.section-title {
+  font-size: 13px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 2px;
+  margin: 24px 0 14px; display: flex; align-items: center; gap: 8px;
+}
+.section-title::before { content: ''; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+
+.overview { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; margin-bottom: 20px; }
+.overview-text { font-size: 13px; color: var(--text-mid); line-height: 1.8; }
+.overview-text strong { color: var(--text); }
+
+.highlight-row { display: flex; justify-content: space-between; gap: 8px; margin: 16px 0 6px; }
+.highlight-item { flex: 1; text-align: center; background: rgba(6,182,212,0.06); border: 1px solid rgba(6,182,212,0.15); border-radius: 10px; padding: 12px 6px; }
+.highlight-num { font-size: 20px; font-weight: 700; color: var(--accent); font-family: "SF Mono", "Fira Code", monospace; margin-bottom: 4px; }
+.highlight-label { font-size: 10px; color: var(--text-dim); line-height: 1.4; }
+.highlight-sub { color: var(--text-dim); opacity: 0.7; }
+
+.tech-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; }
+.tech-item { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 12px; text-align: center; }
+.tech-item .tech-name { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+.tech-item .tech-ver { font-size: 10px; color: var(--text-dim); font-family: "SF Mono", monospace; }
+
+.arch-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; margin-bottom: 20px; }
+.arch-diagram { font-family: "SF Mono", "Fira Code", monospace; font-size: 11px; color: var(--text-mid); line-height: 1.8; white-space: pre; overflow-x: auto; }
+
+.feature-list { list-style: none; }
+.feature-list li { font-size: 13px; color: var(--text-mid); padding: 5px 0; padding-left: 18px; position: relative; }
+.feature-list li::before { content: '▸'; position: absolute; left: 0; color: var(--accent); }
+.feature-list li.success::before { content: '✓'; color: var(--success); }
+
+.func-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 14px; overflow: hidden; }
+.func-header { padding: 14px 18px; display: flex; align-items: center; gap: 12px; }
+.func-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+.func-icon.cyan { background: rgba(6,182,212,0.15); color: #22d3ee; }
+.func-icon.blue { background: rgba(59,130,246,0.15); color: #60a5fa; }
+.func-icon.amber { background: rgba(245,158,11,0.15); color: #fbbf24; }
+.func-icon.green { background: rgba(16,185,129,0.15); color: #34d399; }
+.func-icon.red { background: rgba(239,68,68,0.15); color: #f87171; }
+.func-name { font-size: 14px; font-weight: 600; }
+.func-desc { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+.func-detail { padding: 0 18px 14px; font-size: 12px; color: var(--text-mid); line-height: 1.7; }
+
+.table-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 20px; overflow: hidden; }
+.table-title { padding: 12px 18px; font-size: 13px; font-weight: 600; color: var(--accent); border-bottom: 1px solid var(--border); }
+table.data { width: 100%; border-collapse: collapse; font-size: 12px; }
+table.data th, table.data td { padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--border); color: var(--text-mid); }
+table.data th { color: var(--text-dim); font-weight: 600; font-size: 11px; }
+table.data td b { color: var(--text); }
+table.data td .good { color: var(--success); }
+table.data td .bad { color: var(--danger); }
+
+.footer { text-align: center; padding: 30px 0 40px; border-top: 1px solid var(--border); margin-top: 20px; }
+.footer .copy { font-size: 11px; color: var(--text-dim); }
+
+.demo-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 14px; overflow: hidden; }
+.demo-card video { width: 100%; display: block; background: #000; }
+.demo-caption { padding: 10px 18px 14px; font-size: 12px; color: var(--text-dim); text-align: center; }
+.demo-caption strong { color: var(--accent); }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+.overview, .tech-grid, .arch-card, .func-card, .table-card { animation: fadeUp 0.4s ease backwards; }
+.overview { animation-delay: 0.05s; }
+.arch-card { animation-delay: 0.1s; }
+
+@media (min-width: 768px) { .container { max-width: 720px; padding: 0 24px; } .header h1 { font-size: 28px; } }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="avatar">🧭</div>
+    <h1>传感器融合仿真与轨迹定位</h1>
+    <div class="title">Webots 双载体（4WD + Mavic 无人机）· 自研 ESKF · 误差注入 · 算法对比</div>
+    <p class="bio">四轮车与无人机两种载体的多传感器融合仿真：datasheet 级误差注入、PX4 EKF2 风格 15 维 ESKF 自研实现、六种传感器组合模式全验收，用同一轨迹横向对比五种融合算法的真实水平</p>
+  </div>
+
+  <div class="stats">
+    <div class="stat-item"><div class="num">2</div><div class="label">仿真载体</div></div>
+    <div class="stat-item"><div class="num">5+1</div><div class="label">车版融合模式</div></div>
+    <div class="stat-item"><div class="num">7</div><div class="label">算法横向对比</div></div>
+  </div>
+
+  <div class="section-title">效果演示</div>
+  <div class="demo-card">
+    <video controls muted loop playsinline preload="metadata">
+      <source src="images/drone_fusion.mp4" type="video/mp4">
+      您的浏览器不支持视频播放。
+    </video>
+    <div class="demo-caption"><strong>无人机融合</strong> · Mavic 2 Pro 定高四叶草轨迹跟踪 · 自研 ESKF 多传感器融合定位</div>
+  </div>
+  <div class="demo-card">
+    <video controls muted loop playsinline preload="metadata">
+      <source src="images/car_fusion.mp4" type="video/mp4">
+      您的浏览器不支持视频播放。
+    </video>
+    <div class="demo-caption"><strong>四轮车融合</strong> · 四叶草轨迹 8 线对比 · 同一轨迹五算法横向对比（真值/纯IMU/+磁/+GPS/+光流/互补）</div>
+  </div>
+
+  <div class="section-title">项目概述</div>
+  <div class="overview">
+    <div class="overview-text">
+      在 Webots 中构建传感器融合的<strong>完整实验平台</strong>：四轮车（60×60 场地）与 Mavic 2 Pro 无人机两种载体，从<strong>传感器误差模型</strong>（datasheet 级参数注入）到<strong>融合算法</strong>（互补滤波 / 自研 15 维 ESKF / 纯惯导对照）再到<strong>轨迹可视化</strong>（Display 实时六线 + CSV 离线出图）全链自研。单控制器多模式架构（<strong>--mode 参数切换</strong>）共用全部融合代码，七个世界文件覆盖车版五模式、无人机定点与轨迹跟踪、官方控制器金标准对照。
+    </div>
+    <div class="highlight-row">
+      <div class="highlight-item">
+        <div class="highlight-num">800s/5mm</div>
+        <div class="highlight-label">无人机定点<br><span class="highlight-sub">位置环金标准验证</span></div>
+      </div>
+      <div class="highlight-item">
+        <div class="highlight-num">0.06m</div>
+        <div class="highlight-label">互补滤波四叶草终值<br><span class="highlight-sub">720s 轨迹跟踪</span></div>
+      </div>
+      <div class="highlight-item">
+        <div class="highlight-num">15 维</div>
+        <div class="highlight-label">自研 ESKF<br><span class="highlight-sub">PX4 EKF2 风格</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">核心成果：同轨迹五算法横向对比</div>
+  <div class="table-card">
+    <div class="table-title">四叶草轨迹 720s · 各算法段终值位置误差（同一 CSV 数据源）</div>
+    <table class="data">
+      <tr><th>算法 / 组合</th><th>段终值误差</th><th>漂移形态</th><th>解读</th></tr>
+      <tr><td><b>互补滤波</b>（陀螺+加速度+磁）</td><td><b class="good">0.06 m</b></td><td>有界</td><td>高频陀螺+低频修正，嵌入式性价比之王</td></tr>
+      <tr><td><b>ESKF + GPS</b>（自研 15 维）</td><td><b class="good">0.51 m</b></td><td>有界</td><td>预测/修正双频率架构，GPS 20Hz 修正</td></tr>
+      <tr><td>ESKF + 光流</td><td>3.8 m</td><td>线性漂</td><td>光流尺度估计受限，需配合高度计</td></tr>
+      <tr><td>纯惯导（INSLIB 对照）</td><td>21 km</td><td>快速发散</td><td>无修正积分的必然结局——EKF 预测步对照</td></tr>
+      <tr><td>ESKF + 磁力计</td><td><b class="bad">142 km</b></td><td>发散</td><td>错误航向参考比没有更危险——选型警示案例</td></tr>
+    </table>
+  </div>
+
+  <div class="section-title">系统架构</div>
+  <div class="arch-card">
+    <div class="arch-diagram">7 个世界文件（Webots R2025a）
+  sensor_fusion_4wd{,_enc,_flow,_uwb,_all}.wbt  ← 车版 5 模式
+  sensor_fusion_mavic.wbt / mavic_official_baseline.wbt ← 无人机+官方对照
+        │ controllerArgs 传 --mode 参数
+        ▼
+  ┌─────────────── 单控制器（共用融合代码）───────────────┐
+  │ 传感器误差注入 → 姿态融合/ESKF → 轨迹跟踪控制          │
+  │   IMU/磁/GPS/UWB/光流/编码器    互补滤波 · 15维 ESKF   │
+  └──────────────┬──────────────────┬───────────────────┘
+                 ▼                  ▼
+    Display 实时六线可视化     CSV 行缓冲 → plot_trajectory.py
+    (绿真值/灰纯IMU/蓝+磁/      自动按模式分派出 2×2 对比图
+     红+GPS/青+光流/紫互补)</div>
+  </div>
+
+  <div class="section-title">功能模块</div>
+
+  <div class="func-card">
+    <div class="func-header">
+      <div class="func-icon cyan">🎛️</div>
+      <div><div class="func-name">单控制器多模式架构</div><div class="func-desc">controllerArgs 传 --mode 参数，一套代码七种实验</div></div>
+    </div>
+    <div class="func-detail">fig1（纯惯导）/ enc（+编码器）/ flow（+光流）/ uwb（+UWB）/ all（综合 5+1 线）/ uav（无人机）全部共用同一份融合代码，仅传感器开关与轨迹发生器由启动参数决定——实验变量可控、代码零重复，新增模式只需加一个分支。</div>
+  </div>
+
+  <div class="func-card">
+    <div class="func-header">
+      <div class="func-icon amber">🎲</div>
+      <div><div class="func-name">datasheet 级误差注入模型</div><div class="func-desc">理想真值 + 固定零偏 + 温漂 + 高斯白噪声</div></div>
+    </div>
+    <div class="func-detail">IMU 三项误差（角度随机游走 ARW / 速度随机游走 VRW / 零偏速率随机游走 RRW）、磁力计硬铁+软铁畸变模型；参数从 8 款 IMU datasheet 实测换算（<strong>噪声密度 × √采样率</strong>，62.5Hz 采样下 MPU6050 gyro_std=0.0014 rad/s）——从 $3 的 MPU6050 到 $10k 的导航级 FOG 全覆盖，换传感器只改参数不改代码。</div>
+  </div>
+
+  <div class="func-card">
+    <div class="func-header">
+      <div class="func-icon blue">🧮</div>
+      <div><div class="func-name">自研 15 维 ESKF（PX4 EKF2 风格）</div><div class="func-desc">预测 16ms IMU 驱动 · 修正 20Hz GPS · Joseph 形式</div></div>
+    </div>
+    <div class="func-detail">误差状态向量 [位置(3)|速度(3)|姿态误差(3)|陀螺零偏(3)|加表零偏(3)]；预测步做四元数姿态积分 + 比力旋转去重力 + 协方差传播；修正步算新息与 Kalman 增益后<strong>修正全部 15 维（含零偏估计）</strong>，协方差用 Joseph 形式（数值稳定）。R_gps/Q 调参有明确依据（GPS 信任度与过程噪声权衡）。</div>
+  </div>
+
+  <div class="func-card">
+    <div class="func-header">
+      <div class="func-icon green">📏</div>
+      <div><div class="func-name">六种轨迹发生器 + 官方金标准对照</div><div class="func-desc">螺旋展开/直线/8字/矩形/随机/静止（ZUPT）</div></div>
+    </div>
+    <div class="func-detail">六种轨迹覆盖六类测试目的（加速度积分、姿态融合、航向保持、零速更新等）；无人机定点先用 <strong>官方控制器对照实验</strong>验证世界与物理层（官方 mavic 800 秒漂移 5mm，金标准），再在可信底座上做算法层实验——分层归因不冤枉仿真器。</div>
+  </div>
+
+  <div class="func-card">
+    <div class="func-header">
+      <div class="func-icon red">📊</div>
+      <div><div class="func-name">双通道可视化管线</div><div class="func-desc">Display 实时六线 + CSV → matplotlib 离线出图</div></div>
+    </div>
+    <div class="func-detail">Webots Display 实时叠画六条轨迹（绿真值/灰纯IMU/蓝+磁/红+GPS/青+光流/紫互补），一眼看清各算法发散速度；同时行缓冲写 CSV，<strong>plot_trajectory.py 按模式自动分支</strong>出 2×2 对比图（轨迹/漂移/误差曲线），仿真结束即出报告。</div>
+  </div>
+
+  <div class="section-title">关键技术点</div>
+  <div class="overview">
+    <ul class="feature-list">
+      <li class="success"><strong>分层归因方法论</strong>：官方控制器对照（世界/物理 ✅）→ 自研控制器问题 100% 定位到算法层——排查不冤枉底层</li>
+      <li class="success"><strong>误差模型工程化</strong>：datasheet ARW/VRW/RRW → 采样率换算 → 代码参数，传感器选型即换参数</li>
+      <li class="success"><strong>选型警示案例</strong>：ESKF+磁 142km 发散——错误航向参考比没有更危险，算法对比矩阵同时给出许可证商用限制分析</li>
+      <li class="success"><strong>验证闭环设计</strong>：GUI 运行 + CSV 行缓冲离线诊断（headless 引擎级崩溃环境下可行的仿真验证方案）</li>
+      <li class="success"><strong>公平配对原则</strong>：紫线互补滤波与 ESKF 同输入（mag+flow+enc+uwb），算法对比控制变量</li>
+      <li class="success"><strong>无 ROS2 桥接</strong>：纯 Webots 控制器独立成环，先验证算法本质，ROS2 集成（robot_localization）作标准包对照</li>
+    </ul>
+  </div>
+
+  <div class="section-title">技术栈</div>
+  <div class="tech-grid">
+    <div class="tech-item"><div class="tech-name">Webots R2025a</div><div class="tech-ver">物理仿真 · Display 自绘</div></div>
+    <div class="tech-item"><div class="tech-name">C 控制器（libController）</div><div class="tech-ver">纯 Webots 无 ROS2 桥接</div></div>
+    <div class="tech-item"><div class="tech-name">自研 ESKF</div><div class="tech-ver">15 维 · Joseph 协方差</div></div>
+    <div class="tech-item"><div class="tech-name">互补滤波 / Madgwick</div><div class="tech-ver">姿态融合对照组</div></div>
+    <div class="tech-item"><div class="tech-name">INSLIB 纯惯导</div><div class="tech-ver">SINS 解算对照（AGPL）</div></div>
+    <div class="tech-item"><div class="tech-name">误差注入模型</div><div class="tech-ver">ARW/VRW/RRW + 硬软铁</div></div>
+    <div class="tech-item"><div class="tech-name">Mavic 2 Pro</div><div class="tech-ver">proto + mesh 本地化</div></div>
+    <div class="tech-item"><div class="tech-name">Python matplotlib</div><div class="tech-ver">CSV → 2×2 对比图</div></div>
+  </div>
+
+  <div class="footer">
+    <div class="copy">Webots 双载体 · 自研 ESKF · 五算法同轨迹对比 · 2026</div>
+  </div>
+
+</div>
+</body>
+</html>
