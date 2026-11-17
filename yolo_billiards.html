@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>@ - 台球中八 YOLO 识别（16 类）</title>
+<style>
+:root {
+  --bg: #0a0e1a;
+  --bg-card: #131a2b;
+  --bg-card-hover: #1a2340;
+  --border: #1e293b;
+  --border-active: #06b6d4;
+  --text: #f1f5f9;
+  --text-dim: #64748b;
+  --text-mid: #94a3b8;
+  --accent: #06b6d4;
+  --accent-2: #3b82f6;
+  --warn: #f59e0b;
+  --success: #10b981;
+  --danger: #ef4444;
+  --radius: 14px;
+  --shadow: 0 4px 24px rgba(0,0,0,0.4);
+}
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 20% 50%, rgba(6,182,212,0.06) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(59,130,246,0.05) 0%, transparent 50%),
+    linear-gradient(rgba(30,41,59,0.3) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(30,41,59,0.3) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+.container { max-width: 640px; margin: 0 auto; padding: 0 16px; position: relative; z-index: 1; }
+
+.header { padding: 40px 0 28px; text-align: center; }
+.header .avatar {
+  width: 72px; height: 72px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 16px; font-size: 28px; font-weight: 700; color: #fff;
+  box-shadow: 0 0 24px rgba(6,182,212,0.3);
+}
+.header h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+.header .title {
+  display: inline-block; font-size: 13px; color: var(--accent);
+  background: rgba(6,182,212,0.1); border: 1px solid rgba(6,182,212,0.3);
+  padding: 3px 12px; border-radius: 20px; margin-bottom: 10px;
+}
+.header .bio { font-size: 14px; color: var(--text-mid); max-width: 380px; margin: 0 auto; }
+
+.stats { display: flex; justify-content: center; gap: 24px; padding: 16px 0; margin-bottom: 8px; }
+.stat-item { text-align: center; }
+.stat-item .num { font-size: 24px; font-weight: 700; color: var(--accent); font-family: "SF Mono", "Fira Code", monospace; }
+.stat-item .label { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
+
+.section-title {
+  font-size: 13px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 2px;
+  margin: 24px 0 14px; display: flex; align-items: center; gap: 8px;
+}
+.section-title::before { content: ''; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+
+.overview { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; margin-bottom: 20px; }
+.overview-text { font-size: 13px; color: var(--text-mid); line-height: 1.8; }
+.overview-text strong { color: var(--text); }
+
+.highlight-row { display: flex; justify-content: space-between; gap: 8px; margin: 16px 0 6px; }
+.highlight-item { flex: 1; text-align: center; background: rgba(6,182,212,0.06); border: 1px solid rgba(6,182,212,0.15); border-radius: 10px; padding: 12px 6px; }
+.highlight-num { font-size: 20px; font-weight: 700; color: var(--accent); font-family: "SF Mono", "Fira Code", monospace; margin-bottom: 4px; }
+.highlight-label { font-size: 10px; color: var(--text-dim); line-height: 1.4; }
+.highlight-sub { color: var(--text-dim); opacity: 0.7; }
+
+.tech-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; }
+.tech-item { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 12px; text-align: center; }
+.tech-item .tech-name { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+.tech-item .tech-ver { font-size: 10px; color: var(--text-dim); font-family: "SF Mono", monospace; }
+
+.arch-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; margin-bottom: 20px; }
+.arch-diagram { font-family: "SF Mono", "Fira Code", monospace; font-size: 11px; color: var(--text-mid); line-height: 1.8; white-space: pre; overflow-x: auto; }
+
+.feature-list { list-style: none; }
+.feature-list li { font-size: 13px; color: var(--text-mid); padding: 5px 0; padding-left: 18px; position: relative; }
+.feature-list li::before { content: '▸'; position: absolute; left: 0; color: var(--accent); }
+.feature-list li.success::before { content: '✓'; color: var(--success); }
+
+.func-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 14px; overflow: hidden; }
+.func-header { padding: 14px 18px; display: flex; align-items: center; gap: 12px; }
+.func-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+.func-icon.cyan { background: rgba(6,182,212,0.15); color: #22d3ee; }
+.func-icon.blue { background: rgba(59,130,246,0.15); color: #60a5fa; }
+.func-icon.amber { background: rgba(245,158,11,0.15); color: #fbbf24; }
+.func-icon.green { background: rgba(16,185,129,0.15); color: #34d399; }
+.func-icon.red { background: rgba(239,68,68,0.15); color: #f87171; }
+.func-name { font-size: 14px; font-weight: 600; }
+.func-desc { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+.func-detail { padding: 0 18px 14px; font-size: 12px; color: var(--text-mid); line-height: 1.7; }
+
+.pit-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; margin-bottom: 14px; }
+.pit-title { font-size: 13px; font-weight: 600; margin-bottom: 8px; color: var(--warn); }
+.pit-list { list-style: none; }
+.pit-list li { font-size: 12px; color: var(--text-mid); padding: 4px 0; padding-left: 16px; position: relative; }
+.pit-list li::before { content: '⚠'; position: absolute; left: 0; color: var(--warn); font-size: 10px; }
+
+.table-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 20px; overflow: hidden; }
+.table-title { padding: 12px 18px; font-size: 13px; font-weight: 600; color: var(--accent); border-bottom: 1px solid var(--border); }
+table.data { width: 100%; border-collapse: collapse; font-size: 12px; }
+table.data th, table.data td { padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--border); color: var(--text-mid); }
+table.data th { color: var(--text-dim); font-weight: 600; font-size: 11px; }
+table.data td b { color: var(--text); }
+table.data td .good { color: var(--success); }
+
+.footer { text-align: center; padding: 30px 0 40px; border-top: 1px solid var(--border); margin-top: 20px; }
+.footer .copy { font-size: 11px; color: var(--text-dim); }
+
+.demo-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 14px; overflow: hidden; }
+.demo-card video { width: 100%; display: block; background: #000; }
+.demo-caption { padding: 10px 18px 14px; font-size: 12px; color: var(--text-dim); text-align: center; }
+.demo-caption strong { color: var(--accent); }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+.overview, .tech-grid, .arch-card, .func-card, .pit-card, .table-card { animation: fadeUp 0.4s ease backwards; }
+.overview { animation-delay: 0.05s; }
+.arch-card { animation-delay: 0.1s; }
+
+@media (min-width: 768px) { .container { max-width: 720px; padding: 0 24px; } .header h1 { font-size: 28px; } }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="avatar">🎱</div>
+    <h1>台球中八 YOLO 识别（16 类）</h1>
+    <div class="title">YOLO11n · 自建数据集闭环 · imgsz=1280 · 37fps 实时管线</div>
+    <p class="bio">从录屏素材采集、抽帧去重、labelme 标注到训练部署的完整闭环：16 类中八球按"颜色+实色/条纹"定号，21 张标注起步即 0 漏检，RTX 3050 Ti 实测管线 37fps</p>
+  </div>
+
+  <div class="stats">
+    <div class="stat-item"><div class="num">16</div><div class="label">识别类别</div></div>
+    <div class="stat-item"><div class="num">37fps</div><div class="label">实时管线实测</div></div>
+    <div class="stat-item"><div class="num">20ms</div><div class="label">单帧推理 @1280</div></div>
+  </div>
+
+  <div class="section-title">效果演示</div>
+  <div class="demo-card">
+    <video controls muted loop playsinline preload="metadata">
+      <source src="images/yolo_billiards.mp4" type="video/mp4">
+      您的浏览器不支持视频播放。
+    </video>
+    <div class="demo-caption"><strong>台球中八实时识别</strong> · YOLO11n @1280 · 16 类逐帧检测 + FPS 叠加（RTX 3050 Ti 实测 37fps）</div>
+  </div>
+
+  <div class="section-title">项目概述</div>
+  <div class="overview">
+    <div class="overview-text">
+      腾讯桌球游戏的<strong>台球中八自动识别系统</strong>：16 个类别（ID=球号）按"颜色 + 实色/条纹"定号体系（1-8 实色、9-15 同色条纹、0 白球），无需看清球面数字。完整走通<strong>素材采集 → 抽帧 → 去重 → 标注 → 数据集组装 → 训练 → 视频检测管线</strong>六步全流程，全部工具脚本自研。关键洞察：游戏画面与真实照片的<strong>域差距</strong>使 COCO 预训练模型零检出，而 21 张手标数据的 v0 训练即达成 0 漏检——小而准的自建数据集完胜大而泛的预训练。
+    </div>
+    <div class="highlight-row">
+      <div class="highlight-item">
+        <div class="highlight-num">21张</div>
+        <div class="highlight-label">标注起步<br><span class="highlight-sub">286 框 · 0 漏检</span></div>
+      </div>
+      <div class="highlight-item">
+        <div class="highlight-num">1280</div>
+        <div class="highlight-label">训练分辨率<br><span class="highlight-sub">球径 35-40px 保检出</span></div>
+      </div>
+      <div class="highlight-item">
+        <div class="highlight-num">30min</div>
+        <div class="highlight-label">单次训练<br><span class="highlight-sub">RTX 3050 Ti 4GB</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">训练效果阶梯（域差距实证）</div>
+  <div class="table-card">
+    <div class="table-title">三阶段成果对比</div>
+    <table class="data">
+      <tr><th>阶段</th><th>数据量</th><th>结果</th></tr>
+      <tr><td><b>Level 0 零训练</b></td><td>COCO 预训练 yolo11n</td><td>16 球<b class="bad">零检出</b>（conf 降到 0.01 也没有 sports ball）——真实数据→游戏画面的域差距实证</td></tr>
+      <tr><td><b>v0 训练</b></td><td>21 张标注 / 286 框</td><td><b class="good">0 漏检、定位全准</b>，1/9+2/10 同色条纹对零混淆，评估 8.0/10，GPU 9.6ms/张@1280</td></tr>
+      <tr><td><b>视频实时管线</b></td><td>14916 帧 / 400s 视频</td><td>逐帧检测+画框+FPS 叠加，<b class="good">管线 36.5-37.9fps、单帧推理 20ms</b></td></tr>
+    </table>
+  </div>
+
+  <div class="section-title">系统架构</div>
+  <div class="arch-card">
+    <div class="arch-diagram">【数据集生产线】                【部署检测线】
+手机录屏完整一局                level0_test.py   图片批量 → 画框图
+   │ (五种局面全覆盖)            detect_video_fps.py 视频检测
+   ▼                           → 画框 mp4 + FPS 叠加
+extract_frames.py               → 结束汇总平均帧率
+   │ 每秒2帧+帧间差异过滤          实时摄像头 20 行循环
+   ▼                           → 帧率=min(相机, 管线)
+dhash_dedup.py                  → imageio-ffmpeg 转 H.264
+   │ 感知哈希去重(汉明<6)          (120MB→22MB, 10:1)
+   ▼
+labelme 圆形标注                【模型】yolo11n @imgsz=1280
+   ▼ (json2yolo 兼容 circle)     16 类 ID=球号
+build_dataset.py                1-8 实色 / 9-15 条纹 / 0 白球
+   ▼ (train/val 划分+data.yaml)
+train_v0.py → best.pt</div>
+  </div>
+
+  <div class="section-title">功能模块</div>
+
+  <div class="func-card">
+    <div class="func-header">
+      <div class="func-icon cyan">🎬</div>
+      <div><div class="func-name">素材采集策略</div><div class="func-desc">一局游戏 = 五种局面全覆盖</div></div>
+    </div>
+    <div class="func-detail">开球前/中/散开/局中/剩球少五种局面在一局 3-5 分钟录屏里天然全覆盖；<strong>换球桌皮肤采集防背景过拟合</strong>；规避微信传输（有损压缩毁画质）。素材策略先于标注——数据质量的上限在采集时就决定了。</div>
+  </div>
+
+  <div class="func-card">
+    <div class="func-header">
+      <div class="func-icon blue">🎞️</div>
+      <div><div class="func-name">抽帧与去重管线</div><div class="func-desc">extract_frames.py + dhash_dedup.py 全自研</div></div>
+    </div>
+    <div class="func-detail">每秒 2 帧抽取 + 帧间差异过滤（DIFF_THR=2.0，跳过静止重复帧），<strong>零 ffmpeg 依赖</strong>（cv2 直读）；感知哈希去重相邻帧汉明距离 &lt;6 判重复，隔离到 frames_dup（可回退不删除）——实测 252 张收敛到 86+4 张已标注回归。</div>
+  </div>
+
+  <div class="func-card">
+    <div class="func-header">
+      <div class="func-icon amber">✏️</div>
+      <div><div class="func-name">labelme 圆形标注 + 格式转换</div><div class="func-desc">圆形工具 → YOLO txt 兼容转换</div></div>
+    </div>
+    <div class="func-detail">球是圆的，用 labelme <strong>圆形工具</strong>（圆心+半径）标注比矩形框更贴合；json2yolo.py 兼容 circle 形状（圆心半径→正方形框）；认不清的球跳过不标——<strong>缺失优于错标</strong>。build_dataset.py 自动划分 train/val 并生成 16 类 data.yaml。</div>
+  </div>
+
+  <div class="func-card">
+    <div class="func-header">
+      <div class="func-icon red">📐</div>
+      <div><div class="func-name">imgsz=1280 的 8-10px 铁律</div><div class="func-desc">小目标检出的分辨率底线</div></div>
+    </div>
+    <div class="func-detail">球直径仅 35-40px（2712×1220 原图），640 输入时球剩 8-9px——<strong>恰好卡死检出下限</strong>（Level 0 零检出的根因之一）；1280 时 16-19px 进入安全区。代价是计算量 ×4——<strong>1280 是帧率杀手</strong>，所有部署平台都被它拖累。</div>
+  </div>
+
+  <div class="func-card">
+    <div class="func-header">
+      <div class="func-icon green">🚀</div>
+      <div><div class="func-name">部署帧率预估 + 优化三板斧</div><div class="func-desc">3050Ti 实测基准 → 边缘平台推算</div></div>
+    </div>
+    <div class="func-detail">本机实测 37fps（RTX 3050 Ti + CUDA）；按社区基准 × 尺寸缩放推算 Jetson Orin Nano 15-25fps（TensorRT INT8）、RK3588 11-16fps（RKNN 三核）。优化按性价比排序：<strong>① ROI 裁剪</strong>（球桌占画面 ~70%，裁掉 UI 面积 ×0.55 → 帧率 ×1.8 零精度损失）② 采集端重新构图让球更大 ③ 两段式推理（最后手段）。</div>
+  </div>
+
+  <div class="section-title">识别短板（诚实标注）</div>
+  <div class="overview">
+    <ul class="feature-list">
+      <li><strong>实色球 1-8</strong>：全部 1.00——颜色区分度高的类别先收敛</li>
+      <li><strong>白球</strong>：0.67（误判为 15/1 号）——无色球依赖形状与邻域推理</li>
+      <li><strong>条纹球 9/10/13/15</strong>：0.33-0.67——低样本类别，加数据即解决</li>
+      <li><strong>结论</strong>：短板全部指向数据分布而非模型能力——小数据集迭代路线清晰</li>
+    </ul>
+  </div>
+
+  <div class="section-title">踩坑记录（每条实测付出过时间）</div>
+  <div class="pit-card">
+    <div class="pit-title">环境与数据坑</div>
+    <ul class="pit-list">
+      <li>PyPI 默认源 Windows torch 装出来是 CPU-only（24 个 DLL）→ CUDA 版只在官方源 --index-url cu126</li>
+      <li>import torch WinError 126 → VC++ 运行库 ≥14.4x 缺失</li>
+      <li>YOLO-World / v0 预标注 / 点选工具预填三连否决——分类准确率 &lt;90% 时预填是负资产（错框处理成本 &gt; 从零画框）</li>
+      <li>labelme 用圆形工具转 YOLO 报 0 框 → 转换脚本 dump JSON 看 shape_type 后兼容 circle</li>
+      <li>git-bash 裸反斜杠路径 \t \y 被转义剥除 → 一律正斜杠</li>
+      <li>OpenCV mp4v 输出比 H.264 大 8 倍 → imageio-ffmpeg 转码 libx264 crf26（10:1 视觉无损）</li>
+    </ul>
+  </div>
+
+  <div class="section-title">技术栈</div>
+  <div class="tech-grid">
+    <div class="tech-item"><div class="tech-name">YOLO11n</div><div class="tech-ver">ultralytics · imgsz=1280</div></div>
+    <div class="tech-item"><div class="tech-name">RTX 3050 Ti + CUDA</div><div class="tech-ver">4GB 显存 30min/100ep</div></div>
+    <div class="tech-item"><div class="tech-name">labelme 圆形标注</div><div class="tech-ver">json2yolo 兼容 circle</div></div>
+    <div class="tech-item"><div class="tech-name">dhash 感知哈希</div><div class="tech-ver">汉明距离去重</div></div>
+    <div class="tech-item"><div class="tech-name">OpenCV cv2</div><div class="tech-ver">抽帧/检测/画框</div></div>
+    <div class="tech-item"><div class="tech-name">imageio-ffmpeg</div><div class="tech-ver">H.264 转码 crf26</div></div>
+    <div class="tech-item"><div class="tech-name">自研脚本 7 个</div><div class="tech-ver">抽帧/去重/转换/组装/训练/检测</div></div>
+    <div class="tech-item"><div class="tech-name">部署推算</div><div class="tech-ver">TensorRT / RKNN INT8</div></div>
+  </div>
+
+  <div class="footer">
+    <div class="copy">YOLO11n@1280 · 16 类自建数据集 · 训练-部署全闭环 · 2026</div>
+  </div>
+
+</div>
+</body>
+</html>
